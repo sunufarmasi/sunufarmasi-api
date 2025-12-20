@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sunufarmasi-api
+    env: docker
+    region: frankfurt
+    plan: free
+    healthCheckPath: /api/v1/public/regions
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sunufarmasi-db
+          property: connectionString
+
+databases:
+  - name: sunufarmasi-db
+    plan: free
+    region: frankfurt

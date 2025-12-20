@@ -1,0 +1,898 @@
+{
+  "info": {
+    "name": "SunuFarmasi API - Collection Complète",
+    "description": "Collection complète pour tester l'API SunuFarmasi",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "BASE_URL", "value": "http://localhost:8080/api/v1"},
+    {"key": "TOKEN", "value": ""},
+    {"key": "ADMIN_TOKEN", "value": ""},
+    {"key": "REGION_ID", "value": ""},
+    {"key": "DEPARTEMENT_ID", "value": ""},
+    {"key": "COMMUNE_ID", "value": ""},
+    {"key": "SYNDICAT_ID", "value": ""},
+    {"key": "PHARMACIEN_ID", "value": ""},
+    {"key": "PHARMACIE_ID", "value": ""},
+    {"key": "EMPLOYE_ID", "value": ""},
+    {"key": "PATIENT_ID", "value": ""},
+    {"key": "PRODUIT_ID", "value": ""},
+    {"key": "FOURNISSEUR_ID", "value": ""},
+    {"key": "COMMANDE_ID", "value": ""},
+    {"key": "VENTE_ID", "value": ""},
+    {"key": "MUTUELLE_ID", "value": ""},
+    {"key": "PLANNING_ID", "value": ""},
+    {"key": "GARDE_ID", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "01 - Localisation",
+      "item": [
+        {
+          "name": "01.1 - Créer Région Dakar",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/regions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR\",\n  \"nom\": \"Dakar\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('REGION_ID', jsonData.id);",
+                "pm.test('Région créée', function() { pm.response.to.have.status(201); });"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "01.2 - Créer Région Thiès",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/regions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"THS\",\n  \"nom\": \"Thiès\"\n}"
+            }
+          }
+        },
+        {
+          "name": "01.3 - Créer Département Dakar",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/departements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR-DKR\",\n  \"nom\": \"Dakar\",\n  \"regionId\": \"{{REGION_ID}}\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('DEPARTEMENT_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "01.4 - Créer Département Pikine",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/departements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR-PIK\",\n  \"nom\": \"Pikine\",\n  \"regionId\": \"{{REGION_ID}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "01.5 - Créer Commune Plateau",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/communes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR-PLT\",\n  \"nom\": \"Plateau\",\n  \"departementId\": \"{{DEPARTEMENT_ID}}\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('COMMUNE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "01.6 - Créer Commune Médina",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/communes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR-MED\",\n  \"nom\": \"Médina\",\n  \"departementId\": \"{{DEPARTEMENT_ID}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "01.7 - Créer Commune Yoff",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/communes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DKR-YOF\",\n  \"nom\": \"Yoff\",\n  \"departementId\": \"{{DEPARTEMENT_ID}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "01.8 - Lister Régions",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/regions"
+          }
+        },
+        {
+          "name": "01.9 - Lister Départements par Région",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/regions/{{REGION_ID}}/departements"
+          }
+        },
+        {
+          "name": "01.10 - Lister Communes par Département",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/departements/{{DEPARTEMENT_ID}}/communes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentification",
+      "item": [
+        {
+          "name": "02.1 - Créer Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/auth/register/admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sunufarmasi.sn\",\n  \"password\": \"Admin@123456\",\n  \"prenom\": \"Moussa\",\n  \"nom\": \"DIOP\",\n  \"telephone\": \"+221770001000\",\n  \"role\": \"SUPER_ADMIN\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('ADMIN_TOKEN', jsonData.token);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "02.2 - Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sunufarmasi.sn\",\n  \"password\": \"Admin@123456\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('ADMIN_TOKEN', jsonData.token);"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "03 - Syndicat",
+      "item": [
+        {
+          "name": "03.1 - Créer Syndicat SPPD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/syndicats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SYN-DKR\",\n  \"nom\": \"Syndicat des Pharmaciens Privés de Dakar\",\n  \"sigle\": \"SPPD\",\n  \"description\": \"Syndicat des pharmaciens de Dakar\",\n  \"regionId\": \"{{REGION_ID}}\",\n  \"adresse\": \"25 Avenue LSS, Dakar\",\n  \"telephone\": \"+221338231000\",\n  \"email\": \"contact@sppd.sn\",\n  \"cotisationAnnuelle\": 150000,\n  \"smsGardeActif\": true\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('SYNDICAT_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "03.2 - Créer Membre Président",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/syndicats/{{SYNDICAT_ID}}/membres",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"president@sppd.sn\",\n  \"password\": \"President@123\",\n  \"prenom\": \"Amadou\",\n  \"nom\": \"FALL\",\n  \"telephone\": \"+221776100001\",\n  \"fonction\": \"PRESIDENT\",\n  \"datePriseFonction\": \"2023-01-01\",\n  \"dateFinMandat\": \"2026-12-31\",\n  \"numeroOrdre\": \"PH-DKR-1985-001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "03.3 - Créer Membre Responsable Gardes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/syndicats/{{SYNDICAT_ID}}/membres",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gardes@sppd.sn\",\n  \"password\": \"Gardes@123\",\n  \"prenom\": \"Ousmane\",\n  \"nom\": \"DIALLO\",\n  \"telephone\": \"+221776100005\",\n  \"fonction\": \"RESPONSABLE_GARDES\",\n  \"datePriseFonction\": \"2023-01-01\",\n  \"dateFinMandat\": \"2026-12-31\",\n  \"numeroOrdre\": \"PH-DKR-2005-112\"\n}"
+            }
+          }
+        },
+        {
+          "name": "03.4 - Lister Membres",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/syndicats/{{SYNDICAT_ID}}/membres"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Pharmacien",
+      "item": [
+        {
+          "name": "04.1 - Créer Pharmacien Titulaire 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmaciens",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dr.diop@pharmacie-centrale.sn\",\n  \"password\": \"Pharmacien@123\",\n  \"prenom\": \"Abdoulaye\",\n  \"nom\": \"DIOP\",\n  \"telephone\": \"+221776200001\",\n  \"numeroOrdre\": \"PH-DKR-2008-156\",\n  \"dateInscriptionOrdre\": \"2008-06-15\",\n  \"specialite\": \"OFFICINE\",\n  \"diplome\": \"Doctorat en Pharmacie\",\n  \"universite\": \"UCAD\",\n  \"anneeDiplome\": 2007,\n  \"estTitulaire\": true,\n  \"cotisationOrdreJour\": true,\n  \"dateFinCotisation\": \"2025-12-31\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('PHARMACIEN_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "04.2 - Créer Pharmacien Titulaire 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmaciens",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dr.sow@pharmacie-medina.sn\",\n  \"password\": \"Pharmacien@123\",\n  \"prenom\": \"Aissatou\",\n  \"nom\": \"SOW\",\n  \"telephone\": \"+221776200002\",\n  \"numeroOrdre\": \"PH-DKR-2010-189\",\n  \"dateInscriptionOrdre\": \"2010-03-20\",\n  \"specialite\": \"OFFICINE\",\n  \"estTitulaire\": true,\n  \"cotisationOrdreJour\": true,\n  \"dateFinCotisation\": \"2025-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "04.3 - Créer Pharmacien Assistant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmaciens",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"assistant1@pharmacie.sn\",\n  \"password\": \"Assistant@123\",\n  \"prenom\": \"Cheikh\",\n  \"nom\": \"MBAYE\",\n  \"telephone\": \"+221776200010\",\n  \"numeroOrdre\": \"PH-DKR-2018-345\",\n  \"dateInscriptionOrdre\": \"2018-07-01\",\n  \"specialite\": \"OFFICINE\",\n  \"estTitulaire\": false,\n  \"cotisationOrdreJour\": true,\n  \"dateFinCotisation\": \"2025-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "04.4 - Lister Pharmaciens",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmaciens"
+          }
+        },
+        {
+          "name": "04.5 - Login Pharmacien",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dr.diop@pharmacie-centrale.sn\",\n  \"password\": \"Pharmacien@123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('TOKEN', jsonData.token);"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "05 - Pharmacie",
+      "item": [
+        {
+          "name": "05.1 - Créer Pharmacie Centrale",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PH-DKR-001\",\n  \"nom\": \"Pharmacie Centrale du Plateau\",\n  \"titulaireId\": \"{{PHARMACIEN_ID}}\",\n  \"syndicatId\": \"{{SYNDICAT_ID}}\",\n  \"communeId\": \"{{COMMUNE_ID}}\",\n  \"adresse\": \"15 Avenue LSS\",\n  \"quartier\": \"Plateau\",\n  \"latitude\": 14.6937,\n  \"longitude\": -17.4441,\n  \"zone\": \"ZONE-A\",\n  \"telephone\": \"+221338212345\",\n  \"email\": \"contact@pharmacie-centrale.sn\",\n  \"numeroAutorisation\": \"AUTH-2010-DKR-001\",\n  \"dateAutorisation\": \"2010-01-15\",\n  \"dateOuverture\": \"2010-03-01\",\n  \"heureOuverture\": \"08:00\",\n  \"heureFermeture\": \"22:00\",\n  \"livraisonDisponible\": true,\n  \"fraisLivraison\": 1500,\n  \"participeGardes\": true\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('PHARMACIE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "05.2 - Lister Pharmacies",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/pharmacies"
+          }
+        },
+        {
+          "name": "05.3 - Détail Pharmacie",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}"
+          }
+        },
+        {
+          "name": "05.4 - Pharmacies Proximité",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/pharmacies/proximite?lat=14.6937&lon=-17.4441&rayonKm=5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Employés",
+      "item": [
+        {
+          "name": "06.1 - Créer Préparateur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/employes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"NIANG\",\n  \"prenom\": \"Moustapha\",\n  \"telephone\": \"+221776300001\",\n  \"email\": \"m.niang@pharmacie-centrale.sn\",\n  \"dateNaissance\": \"1990-05-20\",\n  \"poste\": \"PREPARATEUR\",\n  \"dateEmbauche\": \"2020-03-01\",\n  \"typeContrat\": \"CDI\",\n  \"salaireBase\": 250000\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('EMPLOYE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "06.2 - Créer Vendeur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/employes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"FAYE\",\n  \"prenom\": \"Aminata\",\n  \"telephone\": \"+221776300002\",\n  \"dateNaissance\": \"1995-08-12\",\n  \"poste\": \"VENDEUR\",\n  \"dateEmbauche\": \"2022-01-15\",\n  \"typeContrat\": \"CDI\",\n  \"salaireBase\": 150000\n}"
+            }
+          }
+        },
+        {
+          "name": "06.3 - Lister Employés",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/employes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Patients",
+      "item": [
+        {
+          "name": "07.1 - Créer Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/patients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient1@email.sn\",\n  \"password\": \"Patient@123\",\n  \"prenom\": \"Oumar\",\n  \"nom\": \"KANE\",\n  \"telephone\": \"+221776400001\",\n  \"dateNaissance\": \"1975-04-10\",\n  \"sexe\": \"MASCULIN\",\n  \"adresse\": \"Médina, Rue 12\",\n  \"communeId\": \"{{COMMUNE_ID}}\",\n  \"groupeSanguin\": \"O_POSITIF\",\n  \"allergies\": \"Pénicilline\",\n  \"antecedents\": \"Hypertension\",\n  \"consentementRgpd\": true\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('PATIENT_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "07.2 - Lister Patients",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/patients"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Produits & Stock",
+      "item": [
+        {
+          "name": "08.1 - Créer Catégorie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MEDIC\",\n  \"nom\": \"Médicaments\",\n  \"description\": \"Médicaments et spécialités\"\n}"
+            }
+          }
+        },
+        {
+          "name": "08.2 - Créer Produit Doliprane",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/produits",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DOL-1000-BT30\",\n  \"codeBarres\": \"3400936459830\",\n  \"designation\": \"Doliprane 1000mg\",\n  \"dci\": \"Paracétamol\",\n  \"forme\": \"COMPRIME\",\n  \"dosage\": \"1000mg\",\n  \"conditionnement\": \"Boîte de 30\",\n  \"laboratoire\": \"Sanofi\",\n  \"prixPublicConseille\": 3500,\n  \"ordonnanceRequise\": false,\n  \"classeTherapeutique\": \"Antalgique\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('PRODUIT_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "08.3 - Ajouter au Stock Pharmacie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/produits",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"produitId\": \"{{PRODUIT_ID}}\",\n  \"prixAchat\": 2500,\n  \"prixVente\": 3500,\n  \"quantiteStock\": 150,\n  \"quantiteMinimum\": 20,\n  \"emplacement\": \"Rayon A\",\n  \"numeroLot\": \"LOT-2024-12-001\",\n  \"datePeremption\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "08.4 - Lister Stock",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/produits"
+          }
+        },
+        {
+          "name": "08.5 - Alertes Rupture",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/produits/rupture"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Fournisseurs & Commandes",
+      "item": [
+        {
+          "name": "09.1 - Créer Fournisseur LABOREX",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/fournisseurs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FRN-LABOREX\",\n  \"raisonSociale\": \"LABOREX Sénégal\",\n  \"adresse\": \"Zone Industrielle Dakar\",\n  \"telephone\": \"+221338590000\",\n  \"email\": \"commandes@laborex.sn\",\n  \"delaiLivraisonJours\": 2,\n  \"minimumCommande\": 50000\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('FOURNISSEUR_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "09.2 - Créer Commande",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/commandes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fournisseurId\": \"{{FOURNISSEUR_ID}}\",\n  \"dateLivraisonSouhaitee\": \"2025-01-20\",\n  \"notes\": \"Commande urgente\",\n  \"lignes\": [\n    {\n      \"produitId\": \"{{PRODUIT_ID}}\",\n      \"quantiteCommandee\": 100,\n      \"prixUnitaire\": 2500\n    }\n  ]\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('COMMANDE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "09.3 - Valider Commande",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/commandes/{{COMMANDE_ID}}/valider"
+          }
+        },
+        {
+          "name": "09.4 - Lister Commandes",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/commandes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Ventes",
+      "item": [
+        {
+          "name": "10.1 - Créer Vente Comptoir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/ventes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeVente\": \"COMPTOIR\",\n  \"lignes\": [\n    {\n      \"produitPharmacieId\": \"<ID_PRODUIT_PHARMACIE>\",\n      \"quantite\": 2,\n      \"prixUnitaire\": 3500\n    }\n  ],\n  \"modePaiement\": \"ESPECES\",\n  \"montantRecu\": 10000\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('VENTE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "10.2 - Vente avec Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/ventes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeVente\": \"ORDONNANCE\",\n  \"patientId\": \"{{PATIENT_ID}}\",\n  \"numeroOrdonnance\": \"ORD-2025-001\",\n  \"medecinPrescripteur\": \"Dr. Mbaye\",\n  \"lignes\": [\n    {\n      \"produitPharmacieId\": \"<ID>\",\n      \"quantite\": 1,\n      \"prixUnitaire\": 3500\n    }\n  ],\n  \"modePaiement\": \"WAVE\",\n  \"referenceTransaction\": \"WAVE-12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "10.3 - Lister Ventes du Jour",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/ventes?date=2025-01-15"
+          }
+        },
+        {
+          "name": "10.4 - Caisse du Jour",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/ventes/caisse"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Mutuelles",
+      "item": [
+        {
+          "name": "11.1 - Créer Mutuelle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/mutuelles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MUT-SONATEL\",\n  \"nom\": \"IPM Sonatel\",\n  \"type\": \"IPM\",\n  \"adresse\": \"46 Bd République\",\n  \"telephone\": \"+221338394000\",\n  \"email\": \"ipm@sonatel.sn\",\n  \"tauxPriseEnChargeDefaut\": 80,\n  \"plafondAnnuel\": 5000000\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('MUTUELLE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "11.2 - Créer Contrat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/mutuelles/{{MUTUELLE_ID}}/contrats",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pharmacieId\": \"{{PHARMACIE_ID}}\",\n  \"dateDebut\": \"2025-01-01\",\n  \"dateFin\": \"2025-12-31\",\n  \"tauxPriseEnCharge\": 80\n}"
+            }
+          }
+        },
+        {
+          "name": "11.3 - Lister Mutuelles",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/mutuelles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Gardes",
+      "item": [
+        {
+          "name": "12.1 - Créer Planning",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/syndicats/{{SYNDICAT_ID}}/plannings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Planning Gardes Semaine 4\",\n  \"description\": \"Du 20 au 26 janvier\",\n  \"dateDebut\": \"2025-01-20\",\n  \"dateFin\": \"2025-01-26\",\n  \"publicationAuto\": false,\n  \"notifierPharmacies\": true,\n  \"notifierSms\": true,\n  \"notifierEmail\": true\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('PLANNING_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "12.2 - Ajouter Garde",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+            ],
+            "url": "{{BASE_URL}}/plannings/{{PLANNING_ID}}/gardes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pharmacieId\": \"{{PHARMACIE_ID}}\",\n  \"dateGarde\": \"2025-01-20\",\n  \"typeGarde\": \"JOUR\",\n  \"heureDebut\": \"08:00\",\n  \"heureFin\": \"20:00\",\n  \"zone\": \"ZONE-A\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var jsonData = pm.response.json();",
+                "pm.collectionVariables.set('GARDE_ID', jsonData.id);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "12.3 - Soumettre Planning",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/plannings/{{PLANNING_ID}}/soumettre"
+          }
+        },
+        {
+          "name": "12.4 - Valider Planning",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/plannings/{{PLANNING_ID}}/valider"
+          }
+        },
+        {
+          "name": "12.5 - Publier Planning",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/plannings/{{PLANNING_ID}}/publier"
+          }
+        },
+        {
+          "name": "12.6 - Confirmer Garde",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/gardes/{{GARDE_ID}}/confirmer"
+          }
+        },
+        {
+          "name": "12.7 - Pharmacies de Garde Aujourd'hui",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/gardes/aujourd-hui"
+          }
+        },
+        {
+          "name": "12.8 - Gardes par Date",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/gardes?date=2025-01-20"
+          }
+        },
+        {
+          "name": "12.9 - Gardes Proximité",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/gardes/proximite?date=2025-01-20&latitude=14.6937&longitude=-17.4441&rayonKm=5"
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 - Dashboard",
+      "item": [
+        {
+          "name": "13.1 - Dashboard Pharmacie",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/dashboard"
+          }
+        },
+        {
+          "name": "13.2 - Dashboard Syndicat",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}],
+            "url": "{{BASE_URL}}/syndicats/{{SYNDICAT_ID}}/dashboard"
+          }
+        },
+        {
+          "name": "13.3 - Stats Ventes Mois",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{TOKEN}}"}],
+            "url": "{{BASE_URL}}/pharmacies/{{PHARMACIE_ID}}/stats/ventes?periode=MOIS&date=2025-01"
+          }
+        }
+      ]
+    }
+  ]
+}

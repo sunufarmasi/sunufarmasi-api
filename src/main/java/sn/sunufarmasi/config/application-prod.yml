@@ -1,0 +1,109 @@
+# ═══════════════════════════════════════════════════════════
+# PHARMAGO API - CONFIGURATION PRODUCTION
+# ═══════════════════════════════════════════════════════════
+
+spring:
+  # ═══════════════════════════════════════════════════════════
+  # DATASOURCE (PostgreSQL - Production)
+  # ═══════════════════════════════════════════════════════════
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pharmago_prod}
+    username: ${DB_USERNAME:pharmago_user}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # ═══════════════════════════════════════════════════════════
+  # JPA / HIBERNATE (Production)
+  # ═══════════════════════════════════════════════════════════
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate  # NE JAMAIS mettre create/update en PROD !
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # ═══════════════════════════════════════════════════════════
+  # FLYWAY (Migrations - Production)
+  # ═══════════════════════════════════════════════════════════
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+  
+  # ═══════════════════════════════════════════════════════════
+  # JACKSON (JSON - Production)
+  # ═══════════════════════════════════════════════════════════
+  jackson:
+    serialization:
+      indent-output: false  # Désactiver l'indentation en prod
+    default-property-inclusion: non_null
+
+# ═══════════════════════════════════════════════════════════
+# SERVER (Production)
+# ═══════════════════════════════════════════════════════════
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+# ═══════════════════════════════════════════════════════════
+# JWT (Production)
+# ═══════════════════════════════════════════════════════════
+jwt:
+  secret: ${JWT_SECRET}  # OBLIGATOIRE en production (variable d'environnement)
+
+# ═══════════════════════════════════════════════════════════
+# LOGGING (Production)
+# ═══════════════════════════════════════════════════════════
+logging:
+  level:
+    root: WARN
+    sn.pharmago: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+  
+  file:
+    name: /var/log/pharmago/pharmago-api.log
+    max-size: 50MB
+    max-history: 90
+
+# ═══════════════════════════════════════════════════════════
+# SPRINGDOC (Swagger - Désactivé en production)
+# ═══════════════════════════════════════════════════════════
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# ═══════════════════════════════════════════════════════════
+# ACTUATOR (Production - Sécurisé)
+# ═══════════════════════════════════════════════════════════
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: never

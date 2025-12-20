@@ -1,0 +1,1148 @@
+{
+  "pays": [
+    {
+      "code": "SN",
+      "nom": "Sénégal",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Dakar",
+      "indicatifTelephonique": "+221",
+      "actif": true
+    },
+    {
+      "code": "ML",
+      "nom": "Mali",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Bamako",
+      "indicatifTelephonique": "+223",
+      "actif": true
+    },
+    {
+      "code": "CI",
+      "nom": "Côte d'Ivoire",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Abidjan",
+      "indicatifTelephonique": "+225",
+      "actif": true
+    },
+    {
+      "code": "BF",
+      "nom": "Burkina Faso",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Ouagadougou",
+      "indicatifTelephonique": "+226",
+      "actif": true
+    },
+    {
+      "code": "GN",
+      "nom": "Guinée",
+      "devise": "GNF",
+      "fuseauHoraire": "Africa/Conakry",
+      "indicatifTelephonique": "+224",
+      "actif": true
+    },
+    {
+      "code": "BJ",
+      "nom": "Bénin",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Porto-Novo",
+      "indicatifTelephonique": "+229",
+      "actif": true
+    },
+    {
+      "code": "TG",
+      "nom": "Togo",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Lome",
+      "indicatifTelephonique": "+228",
+      "actif": true
+    },
+    {
+      "code": "NE",
+      "nom": "Niger",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Niamey",
+      "indicatifTelephonique": "+227",
+      "actif": true
+    },
+    {
+      "code": "GH",
+      "nom": "Ghana",
+      "devise": "GHS",
+      "fuseauHoraire": "Africa/Accra",
+      "indicatifTelephonique": "+233",
+      "actif": true
+    },
+    {
+      "code": "LR",
+      "nom": "Liberia",
+      "devise": "LRD",
+      "fuseauHoraire": "Africa/Monrovia",
+      "indicatifTelephonique": "+231",
+      "actif": true
+    },
+    {
+      "code": "SL",
+      "nom": "Sierra Leone",
+      "devise": "SLL",
+      "fuseauHoraire": "Africa/Freetown",
+      "indicatifTelephonique": "+232",
+      "actif": true
+    },
+    {
+      "code": "GM",
+      "nom": "Gambie",
+      "devise": "GMD",
+      "fuseauHoraire": "Africa/Banjul",
+      "indicatifTelephonique": "+220",
+      "actif": true
+    },
+    {
+      "code": "GW",
+      "nom": "Guinée-Bissau",
+      "devise": "FCFA",
+      "fuseauHoraire": "Africa/Bissau",
+      "indicatifTelephonique": "+245",
+      "actif": true
+    },
+    {
+      "code": "MR",
+      "nom": "Mauritanie",
+      "devise": "MRU",
+      "fuseauHoraire": "Africa/Nouakchott",
+      "indicatifTelephonique": "+222",
+      "actif": true
+    },
+    {
+      "code": "CV",
+      "nom": "Cap-Vert",
+      "devise": "CVE",
+      "fuseauHoraire": "Atlantic/Cape_Verde",
+      "indicatifTelephonique": "+238",
+      "actif": true
+    }
+  ],
+
+  "regions": [
+    {
+      "code": "DK",
+      "nom": "Dakar",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "TH",
+      "nom": "Thiès",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "SL",
+      "nom": "Saint-Louis",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "DB",
+      "nom": "Diourbel",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "KL",
+      "nom": "Kaolack",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "LG",
+      "nom": "Louga",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "MT",
+      "nom": "Matam",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "ZG",
+      "nom": "Ziguinchor",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "KD",
+      "nom": "Kolda",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "SD",
+      "nom": "Sédhiou",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "TC",
+      "nom": "Tambacounda",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "KE",
+      "nom": "Kédougou",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "FK",
+      "nom": "Fatick",
+      "paysId": "{id-pays-senegal}"
+    },
+    {
+      "code": "KF",
+      "nom": "Kaffrine",
+      "paysId": "{id-pays-senegal}"
+    }
+  ],
+
+  "departements": [
+    {
+      "code": "DKR",
+      "nom": "Dakar",
+      "regionId": "{id-region-dakar}"
+    },
+    {
+      "code": "PIK",
+      "nom": "Pikine",
+      "regionId": "{id-region-dakar}"
+    },
+    {
+      "code": "GUE",
+      "nom": "Guédiawaye",
+      "regionId": "{id-region-dakar}"
+    },
+    {
+      "code": "RUF",
+      "nom": "Rufisque",
+      "regionId": "{id-region-dakar}"
+    },
+    {
+      "code": "THS",
+      "nom": "Thiès",
+      "regionId": "{id-region-thies}"
+    },
+    {
+      "code": "TIV",
+      "nom": "Tivaouane",
+      "regionId": "{id-region-thies}"
+    },
+    {
+      "code": "MBR",
+      "nom": "Mbour",
+      "regionId": "{id-region-thies}"
+    },
+    {
+      "code": "SLS",
+      "nom": "Saint-Louis",
+      "regionId": "{id-region-saint-louis}"
+    },
+    {
+      "code": "DAG",
+      "nom": "Dagana",
+      "regionId": "{id-region-saint-louis}"
+    },
+    {
+      "code": "POD",
+      "nom": "Podor",
+      "regionId": "{id-region-saint-louis}"
+    },
+    {
+      "code": "DBL",
+      "nom": "Diourbel",
+      "regionId": "{id-region-diourbel}"
+    },
+    {
+      "code": "MBK",
+      "nom": "Mbacké",
+      "regionId": "{id-region-diourbel}"
+    },
+    {
+      "code": "BAM",
+      "nom": "Bambey",
+      "regionId": "{id-region-diourbel}"
+    },
+    {
+      "code": "KLK",
+      "nom": "Kaolack",
+      "regionId": "{id-region-kaolack}"
+    },
+    {
+      "code": "NIO",
+      "nom": "Nioro du Rip",
+      "regionId": "{id-region-kaolack}"
+    },
+    {
+      "code": "GAN",
+      "nom": "Guinguinéo",
+      "regionId": "{id-region-kaolack}"
+    },
+    {
+      "code": "LGA",
+      "nom": "Louga",
+      "regionId": "{id-region-louga}"
+    },
+    {
+      "code": "KEB",
+      "nom": "Kébémer",
+      "regionId": "{id-region-louga}"
+    },
+    {
+      "code": "LIN",
+      "nom": "Linguère",
+      "regionId": "{id-region-louga}"
+    },
+    {
+      "code": "MTM",
+      "nom": "Matam",
+      "regionId": "{id-region-matam}"
+    },
+    {
+      "code": "KNL",
+      "nom": "Kanel",
+      "regionId": "{id-region-matam}"
+    },
+    {
+      "code": "RNR",
+      "nom": "Ranerou",
+      "regionId": "{id-region-matam}"
+    },
+    {
+      "code": "ZIG",
+      "nom": "Ziguinchor",
+      "regionId": "{id-region-ziguinchor}"
+    },
+    {
+      "code": "OUS",
+      "nom": "Oussouye",
+      "regionId": "{id-region-ziguinchor}"
+    },
+    {
+      "code": "BIG",
+      "nom": "Bignona",
+      "regionId": "{id-region-ziguinchor}"
+    },
+    {
+      "code": "KOL",
+      "nom": "Kolda",
+      "regionId": "{id-region-kolda}"
+    },
+    {
+      "code": "VEL",
+      "nom": "Vélingara",
+      "regionId": "{id-region-kolda}"
+    },
+    {
+      "code": "MED",
+      "nom": "Médina Yoro Foulah",
+      "regionId": "{id-region-kolda}"
+    },
+    {
+      "code": "SEH",
+      "nom": "Sédhiou",
+      "regionId": "{id-region-sedhiou}"
+    },
+    {
+      "code": "BKL",
+      "nom": "Bounkiling",
+      "regionId": "{id-region-sedhiou}"
+    },
+    {
+      "code": "GDM",
+      "nom": "Goudomp",
+      "regionId": "{id-region-sedhiou}"
+    },
+    {
+      "code": "TAM",
+      "nom": "Tambacounda",
+      "regionId": "{id-region-tambacounda}"
+    },
+    {
+      "code": "BKL-TAM",
+      "nom": "Bakel",
+      "regionId": "{id-region-tambacounda}"
+    },
+    {
+      "code": "GMB",
+      "nom": "Goudiry",
+      "regionId": "{id-region-tambacounda}"
+    },
+    {
+      "code": "KNG",
+      "nom": "Koumpentoum",
+      "regionId": "{id-region-tambacounda}"
+    },
+    {
+      "code": "KDG",
+      "nom": "Kédougou",
+      "regionId": "{id-region-kedougou}"
+    },
+    {
+      "code": "SAL",
+      "nom": "Salémata",
+      "regionId": "{id-region-kedougou}"
+    },
+    {
+      "code": "SAR",
+      "nom": "Saraya",
+      "regionId": "{id-region-kedougou}"
+    },
+    {
+      "code": "FTK",
+      "nom": "Fatick",
+      "regionId": "{id-region-fatick}"
+    },
+    {
+      "code": "FND",
+      "nom": "Foundiougne",
+      "regionId": "{id-region-fatick}"
+    },
+    {
+      "code": "GOS",
+      "nom": "Gossas",
+      "regionId": "{id-region-fatick}"
+    },
+    {
+      "code": "KAF",
+      "nom": "Kaffrine",
+      "regionId": "{id-region-kaffrine}"
+    },
+    {
+      "code": "BRD",
+      "nom": "Birkelane",
+      "regionId": "{id-region-kaffrine}"
+    },
+    {
+      "code": "KNG-KAF",
+      "nom": "Koungheul",
+      "regionId": "{id-region-kaffrine}"
+    },
+    {
+      "code": "MAL",
+      "nom": "Malem-Hodar",
+      "regionId": "{id-region-kaffrine}"
+    }
+  ],
+
+  "communes": [
+    {
+      "code": "DKR-PLAT",
+      "nom": "Plateau",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.6928,
+      "longitude": -17.4467,
+      "population": 50000,
+      "superficie": 2.5
+    },
+    {
+      "code": "DKR-MED",
+      "nom": "Médina",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.6937,
+      "longitude": -17.4441,
+      "population": 90000,
+      "superficie": 3.2
+    },
+    {
+      "code": "DKR-PA",
+      "nom": "Parcelles Assainies",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7644,
+      "longitude": -17.4222,
+      "population": 200000,
+      "superficie": 15.0
+    },
+    {
+      "code": "DKR-HLM",
+      "nom": "HLM",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7319,
+      "longitude": -17.4572,
+      "population": 70000,
+      "superficie": 4.0
+    },
+    {
+      "code": "DKR-SICAP",
+      "nom": "Sicap Liberté",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7197,
+      "longitude": -17.4569,
+      "population": 60000,
+      "superficie": 3.5
+    },
+    {
+      "code": "DKR-GD",
+      "nom": "Grand Dakar",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7167,
+      "longitude": -17.4677,
+      "population": 80000,
+      "superficie": 5.0
+    },
+    {
+      "code": "DKR-FANN",
+      "nom": "Fann Point E",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7069,
+      "longitude": -17.4692,
+      "population": 40000,
+      "superficie": 2.8
+    },
+    {
+      "code": "DKR-MERM",
+      "nom": "Mermoz Sacré-Cœur",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7100,
+      "longitude": -17.4600,
+      "population": 35000,
+      "superficie": 3.0
+    },
+    {
+      "code": "DKR-OUA",
+      "nom": "Ouakam",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7156,
+      "longitude": -17.4944,
+      "population": 35000,
+      "superficie": 4.5
+    },
+    {
+      "code": "DKR-YOFF",
+      "nom": "Yoff",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7439,
+      "longitude": -17.4872,
+      "population": 55000,
+      "superficie": 8.0
+    },
+    {
+      "code": "DKR-NGOR",
+      "nom": "Ngor",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7500,
+      "longitude": -17.5167,
+      "population": 25000,
+      "superficie": 3.0
+    },
+    {
+      "code": "DKR-ALMD",
+      "nom": "Almadies",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7333,
+      "longitude": -17.5167,
+      "population": 20000,
+      "superficie": 5.5
+    },
+    {
+      "code": "DKR-HANN",
+      "nom": "Hann Bel-Air",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7453,
+      "longitude": -17.4181,
+      "population": 45000,
+      "superficie": 3.8
+    },
+    {
+      "code": "DKR-GORA",
+      "nom": "Gueule Tapée-Fass-Colobane",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.6886,
+      "longitude": -17.4542,
+      "population": 75000,
+      "superficie": 2.2
+    },
+    {
+      "code": "DKR-DIEU",
+      "nom": "Dieuppeul-Derklé",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7319,
+      "longitude": -17.4736,
+      "population": 55000,
+      "superficie": 4.2
+    },
+    {
+      "code": "DKR-PATTE",
+      "nom": "Patte d'Oie",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7397,
+      "longitude": -17.4647,
+      "population": 48000,
+      "superficie": 3.6
+    },
+    {
+      "code": "DKR-BISCUIT",
+      "nom": "Biscuiterie",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7244,
+      "longitude": -17.4564,
+      "population": 52000,
+      "superficie": 3.3
+    },
+    {
+      "code": "DKR-CAMB",
+      "nom": "Cambérène",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.7728,
+      "longitude": -17.4408,
+      "population": 38000,
+      "superficie": 6.0
+    },
+    {
+      "code": "DKR-GORÉE",
+      "nom": "Gorée",
+      "departementId": "{id-dept-dakar}",
+      "latitude": 14.6675,
+      "longitude": -17.3989,
+      "population": 1500,
+      "superficie": 0.2
+    },
+    {
+      "code": "PIK-CENT",
+      "nom": "Pikine Centre",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7500,
+      "longitude": -17.3833,
+      "population": 150000,
+      "superficie": 10.0
+    },
+    {
+      "code": "PIK-NORD",
+      "nom": "Pikine Nord",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7667,
+      "longitude": -17.3833,
+      "population": 120000,
+      "superficie": 8.5
+    },
+    {
+      "code": "PIK-OUEST",
+      "nom": "Pikine Ouest",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7500,
+      "longitude": -17.4000,
+      "population": 110000,
+      "superficie": 7.8
+    },
+    {
+      "code": "PIK-EST",
+      "nom": "Pikine Est",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7500,
+      "longitude": -17.3667,
+      "population": 130000,
+      "superficie": 9.2
+    },
+    {
+      "code": "PIK-SUD",
+      "nom": "Pikine Sud",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7333,
+      "longitude": -17.3833,
+      "population": 100000,
+      "superficie": 7.0
+    },
+    {
+      "code": "PIK-THIA",
+      "nom": "Thiaroye",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7667,
+      "longitude": -17.3667,
+      "population": 100000,
+      "superficie": 8.5
+    },
+    {
+      "code": "PIK-DIA",
+      "nom": "Diamaguène",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7833,
+      "longitude": -17.3833,
+      "population": 80000,
+      "superficie": 6.0
+    },
+    {
+      "code": "PIK-YEUMB",
+      "nom": "Yeumbeul",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7667,
+      "longitude": -17.3500,
+      "population": 95000,
+      "superficie": 7.5
+    },
+    {
+      "code": "PIK-MBAO",
+      "nom": "Mbao",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7333,
+      "longitude": -17.3333,
+      "population": 70000,
+      "superficie": 5.5
+    },
+    {
+      "code": "PIK-KEUR",
+      "nom": "Keur Massar",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7833,
+      "longitude": -17.3167,
+      "population": 180000,
+      "superficie": 20.0
+    },
+    {
+      "code": "PIK-MALIKA",
+      "nom": "Malika",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7897,
+      "longitude": -17.3792,
+      "population": 85000,
+      "superficie": 6.8
+    },
+    {
+      "code": "PIK-TIVAR",
+      "nom": "Tivaouane Diacksao",
+      "departementId": "{id-dept-pikine}",
+      "latitude": 14.7764,
+      "longitude": -17.3528,
+      "population": 65000,
+      "superficie": 5.2
+    },
+    {
+      "code": "GUE-CENT",
+      "nom": "Guédiawaye Centre",
+      "departementId": "{id-dept-guediawaye}",
+      "latitude": 14.7667,
+      "longitude": -17.4167,
+      "population": 100000,
+      "superficie": 5.0
+    },
+    {
+      "code": "GUE-NORD",
+      "nom": "Sam Notaire",
+      "departementId": "{id-dept-guediawaye}",
+      "latitude": 14.7750,
+      "longitude": -17.4167,
+      "population": 85000,
+      "superficie": 4.5
+    },
+    {
+      "code": "GUE-GOLF",
+      "nom": "Golf Sud",
+      "departementId": "{id-dept-guediawaye}",
+      "latitude": 14.7583,
+      "longitude": -17.4167,
+      "population": 90000,
+      "superficie": 4.8
+    },
+    {
+      "code": "GUE-MEDI",
+      "nom": "Médina Gounass",
+      "departementId": "{id-dept-guediawaye}",
+      "latitude": 14.7667,
+      "longitude": -17.4250,
+      "population": 75000,
+      "superficie": 4.2
+    },
+    {
+      "code": "GUE-WAK",
+      "nom": "Wakhinane Nimzatt",
+      "departementId": "{id-dept-guediawaye}",
+      "latitude": 14.7583,
+      "longitude": -17.4083,
+      "population": 95000,
+      "superficie": 5.5
+    },
+    {
+      "code": "RUF-VILLE",
+      "nom": "Rufisque",
+      "departementId": "{id-dept-rufisque}",
+      "latitude": 14.7167,
+      "longitude": -17.2667,
+      "population": 120000,
+      "superficie": 15.0
+    },
+    {
+      "code": "RUF-BARG",
+      "nom": "Bargny",
+      "departementId": "{id-dept-rufisque}",
+      "latitude": 14.7000,
+      "longitude": -17.2333,
+      "population": 75000,
+      "superficie": 12.0
+    },
+    {
+      "code": "RUF-DIAM",
+      "nom": "Diamniadio",
+      "departementId": "{id-dept-rufisque}",
+      "latitude": 14.7167,
+      "longitude": -17.1833,
+      "population": 60000,
+      "superficie": 18.0
+    },
+    {
+      "code": "RUF-SEBE",
+      "nom": "Sébikotane",
+      "departementId": "{id-dept-rufisque}",
+      "latitude": 14.7500,
+      "longitude": -17.1333,
+      "population": 55000,
+      "superficie": 20.0
+    },
+    {
+      "code": "RUF-SANG",
+      "nom": "Sangalkam",
+      "departementId": "{id-dept-rufisque}",
+      "latitude": 14.8000,
+      "longitude": -17.2333,
+      "population": 35000,
+      "superficie": 25.0
+    },
+    {
+      "code": "THS-VILLE",
+      "nom": "Thiès",
+      "departementId": "{id-dept-thies}",
+      "latitude": 14.7889,
+      "longitude": -16.9319,
+      "population": 320000,
+      "superficie": 25.0
+    },
+    {
+      "code": "THS-OUEST",
+      "nom": "Thiès Ouest",
+      "departementId": "{id-dept-thies}",
+      "latitude": 14.7850,
+      "longitude": -16.9500,
+      "population": 85000,
+      "superficie": 12.0
+    },
+    {
+      "code": "THS-EST",
+      "nom": "Thiès Est",
+      "departementId": "{id-dept-thies}",
+      "latitude": 14.7920,
+      "longitude": -16.9150,
+      "population": 90000,
+      "superficie": 13.0
+    },
+    {
+      "code": "TIV-VILLE",
+      "nom": "Tivaouane",
+      "departementId": "{id-dept-tivaouane}",
+      "latitude": 14.9500,
+      "longitude": -16.8167,
+      "population": 45000,
+      "superficie": 8.0
+    },
+    {
+      "code": "TIV-MBORO",
+      "nom": "Mboro",
+      "departementId": "{id-dept-tivaouane}",
+      "latitude": 15.2167,
+      "longitude": -16.7333,
+      "population": 35000,
+      "superficie": 15.0
+    },
+    {
+      "code": "MBR-VILLE",
+      "nom": "Mbour",
+      "departementId": "{id-dept-mbour}",
+      "latitude": 14.4167,
+      "longitude": -16.9667,
+      "population": 180000,
+      "superficie": 22.0
+    },
+    {
+      "code": "MBR-SALY",
+      "nom": "Saly",
+      "departementId": "{id-dept-mbour}",
+      "latitude": 14.4500,
+      "longitude": -17.0333,
+      "population": 25000,
+      "superficie": 8.0
+    },
+    {
+      "code": "MBR-NIANING",
+      "nom": "Nianing",
+      "departementId": "{id-dept-mbour}",
+      "latitude": 14.3833,
+      "longitude": -16.8833,
+      "population": 18000,
+      "superficie": 6.5
+    },
+    {
+      "code": "SLS-VILLE",
+      "nom": "Saint-Louis",
+      "departementId": "{id-dept-saint-louis}",
+      "latitude": 16.0189,
+      "longitude": -16.4892,
+      "population": 230000,
+      "superficie": 28.0
+    },
+    {
+      "code": "DAG-VILLE",
+      "nom": "Dagana",
+      "departementId": "{id-dept-dagana}",
+      "latitude": 16.5167,
+      "longitude": -15.5000,
+      "population": 30000,
+      "superficie": 12.0
+    },
+    {
+      "code": "DAG-RICHARD",
+      "nom": "Richard Toll",
+      "departementId": "{id-dept-dagana}",
+      "latitude": 16.4500,
+      "longitude": -15.7000,
+      "population": 65000,
+      "superficie": 18.0
+    },
+    {
+      "code": "POD-VILLE",
+      "nom": "Podor",
+      "departementId": "{id-dept-podor}",
+      "latitude": 16.6500,
+      "longitude": -14.9667,
+      "population": 18000,
+      "superficie": 10.0
+    },
+    {
+      "code": "DBL-VILLE",
+      "nom": "Diourbel",
+      "departementId": "{id-dept-diourbel}",
+      "latitude": 14.6500,
+      "longitude": -16.2333,
+      "population": 120000,
+      "superficie": 15.0
+    },
+    {
+      "code": "MBK-VILLE",
+      "nom": "Mbacké",
+      "departementId": "{id-dept-mbacke}",
+      "latitude": 14.7833,
+      "longitude": -15.9167,
+      "population": 85000,
+      "superficie": 12.0
+    },
+    {
+      "code": "MBK-TOUBA",
+      "nom": "Touba",
+      "departementId": "{id-dept-mbacke}",
+      "latitude": 14.8500,
+      "longitude": -15.8833,
+      "population": 750000,
+      "superficie": 45.0
+    },
+    {
+      "code": "BAM-VILLE",
+      "nom": "Bambey",
+      "departementId": "{id-dept-bambey}",
+      "latitude": 14.7000,
+      "longitude": -16.4500,
+      "population": 25000,
+      "superficie": 8.0
+    },
+    {
+      "code": "KLK-VILLE",
+      "nom": "Kaolack",
+      "departementId": "{id-dept-kaolack}",
+      "latitude": 14.1333,
+      "longitude": -16.0667,
+      "population": 230000,
+      "superficie": 28.0
+    },
+    {
+      "code": "NIO-VILLE",
+      "nom": "Nioro du Rip",
+      "departementId": "{id-dept-nioro}",
+      "latitude": 13.7500,
+      "longitude": -15.8000,
+      "population": 40000,
+      "superficie": 12.0
+    },
+    {
+      "code": "GAN-VILLE",
+      "nom": "Guinguinéo",
+      "departementId": "{id-dept-guinguineo}",
+      "latitude": 14.2667,
+      "longitude": -15.9500,
+      "population": 28000,
+      "superficie": 10.0
+    },
+    {
+      "code": "LGA-VILLE",
+      "nom": "Louga",
+      "departementId": "{id-dept-louga}",
+      "latitude": 15.6167,
+      "longitude": -16.2333,
+      "population": 95000,
+      "superficie": 18.0
+    },
+    {
+      "code": "KEB-VILLE",
+      "nom": "Kébémer",
+      "departementId": "{id-dept-kebemer}",
+      "latitude": 15.3667,
+      "longitude": -16.4500,
+      "population": 38000,
+      "superficie": 12.0
+    },
+    {
+      "code": "LIN-VILLE",
+      "nom": "Linguère",
+      "departementId": "{id-dept-linguere}",
+      "latitude": 15.3833,
+      "longitude": -15.1167,
+      "population": 30000,
+      "superficie": 15.0
+    },
+    {
+      "code": "MTM-VILLE",
+      "nom": "Matam",
+      "departementId": "{id-dept-matam}",
+      "latitude": 15.6500,
+      "longitude": -13.2500,
+      "population": 45000,
+      "superficie": 12.0
+    },
+    {
+      "code": "KNL-VILLE",
+      "nom": "Kanel",
+      "departementId": "{id-dept-kanel}",
+      "latitude": 15.4833,
+      "longitude": -13.1833,
+      "population": 22000,
+      "superficie": 8.0
+    },
+    {
+      "code": "ZIG-VILLE",
+      "nom": "Ziguinchor",
+      "departementId": "{id-dept-ziguinchor}",
+      "latitude": 12.5833,
+      "longitude": -16.2667,
+      "population": 205000,
+      "superficie": 25.0
+    },
+    {
+      "code": "OUS-VILLE",
+      "nom": "Oussouye",
+      "departementId": "{id-dept-oussouye}",
+      "latitude": 12.4833,
+      "longitude": -16.5500,
+      "population": 15000,
+      "superficie": 6.0
+    },
+    {
+      "code": "BIG-VILLE",
+      "nom": "Bignona",
+      "departementId": "{id-dept-bignona}",
+      "latitude": 12.8167,
+      "longitude": -16.2167,
+      "population": 38000,
+      "superficie": 10.0
+    },
+    {
+      "code": "KOL-VILLE",
+      "nom": "Kolda",
+      "departementId": "{id-dept-kolda}",
+      "latitude": 12.8833,
+      "longitude": -14.9500,
+      "population": 75000,
+      "superficie": 15.0
+    },
+    {
+      "code": "VEL-VILLE",
+      "nom": "Vélingara",
+      "departementId": "{id-dept-velingara}",
+      "latitude": 13.1500,
+      "longitude": -14.1167,
+      "population": 42000,
+      "superficie": 12.0
+    },
+    {
+      "code": "SEH-VILLE",
+      "nom": "Sédhiou",
+      "departementId": "{id-dept-sedhiou}",
+      "latitude": 12.7083,
+      "longitude": -15.5569,
+      "population": 38000,
+      "superficie": 10.0
+    },
+    {
+      "code": "TAM-VILLE",
+      "nom": "Tambacounda",
+      "departementId": "{id-dept-tambacounda}",
+      "latitude": 13.7667,
+      "longitude": -13.6667,
+      "population": 95000,
+      "superficie": 20.0
+    },
+    {
+      "code": "BKL-VILLE",
+      "nom": "Bakel",
+      "departementId": "{id-dept-bakel}",
+      "latitude": 14.9000,
+      "longitude": -12.4667,
+      "population": 22000,
+      "superficie": 8.0
+    },
+    {
+      "code": "KDG-VILLE",
+      "nom": "Kédougou",
+      "departementId": "{id-dept-kedougou}",
+      "latitude": 12.5500,
+      "longitude": -12.1833,
+      "population": 28000,
+      "superficie": 12.0
+    },
+    {
+      "code": "SAL-VILLE",
+      "nom": "Salémata",
+      "departementId": "{id-dept-salemata}",
+      "latitude": 12.7167,
+      "longitude": -12.7000,
+      "population": 8000,
+      "superficie": 5.0
+    },
+    {
+      "code": "FTK-VILLE",
+      "nom": "Fatick",
+      "departementId": "{id-dept-fatick}",
+      "latitude": 14.3333,
+      "longitude": -16.4167,
+      "population": 35000,
+      "superficie": 10.0
+    },
+    {
+      "code": "FND-VILLE",
+      "nom": "Foundiougne",
+      "departementId": "{id-dept-foundiougne}",
+      "latitude": 14.1333,
+      "longitude": -16.4667,
+      "population": 18000,
+      "superficie": 7.0
+    },
+    {
+      "code": "KAF-VILLE",
+      "nom": "Kaffrine",
+      "departementId": "{id-dept-kaffrine}",
+      "latitude": 14.1000,
+      "longitude": -15.5500,
+      "population": 55000,
+      "superficie": 12.0
+    },
+    {
+      "code": "BRD-VILLE",
+      "nom": "Birkelane",
+      "departementId": "{id-dept-birkelane}",
+      "latitude": 14.2667,
+      "longitude": -15.5333,
+      "population": 20000,
+      "superficie": 8.0
+    },
+    {
+      "code": "KNG-VILLE",
+      "nom": "Koungheul",
+      "departementId": "{id-dept-koungheul}",
+      "latitude": 13.9833,
+      "longitude": -14.8000,
+      "population": 25000,
+      "superficie": 9.0
+    }
+  ]
+}

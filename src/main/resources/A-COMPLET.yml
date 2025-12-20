@@ -1,0 +1,178 @@
+#spring:
+#  application:
+#    name: SunuFarmasi API
+#
+#  datasource:
+#    url: jdbc:h2:mem:testdb
+##    url: jdbc:postgresql://localhost:5432/sunufarmasi
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+##    driver-class-name: org.postgresql.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+##    show-sql: true
+##    properties:
+##      hibernate:
+##        dialect: org.hibernate.dialect.PostgreSQLDialect
+#
+#  flyway:
+#    enabled: false
+#
+#server:
+#  port: 8080
+
+
+spring:
+  application:
+    name: sunufarmasi-backend
+
+  # Configuration Base de données PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sunufarmasi-develop
+    username: postgres
+    password: R00t
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  # Configuration JPA/Hibernate
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update  # create-drop en dev, validate en prod
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+    defer-datasource-initialization: true
+
+  # Configuration SQL init
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      continue-on-error: false
+
+  # Configuration Jackson
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    deserialization:
+      fail-on-unknown-properties: false
+
+# Configuration Serveur
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+# Configuration JWT
+jwt:
+  secret: 3F4428472B4B6250655368566D5971337336763979244226452948404D635166
+  # IMPORTANT: Changer ce secret en production !
+  # Générer avec: openssl rand -base64 64
+
+  access-token-expiration: 3600000      # 1 heure (en millisecondes)
+  refresh-token-expiration: 2592000000  # 30 jours (en millisecondes)
+  issuer: pharmago-api
+
+# Configuration Application
+app:
+  name: SunuFarmasi API
+  version: 1.0.0
+  description: API Backend pour PharmaGo - Localisateur de pharmacies
+
+  # Configuration OTP
+  otp:
+    length: 6
+    validity-minutes: 5
+    resend-cooldown-seconds: 60
+    max-attempts: 3
+
+  # Configuration CORS
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:4200
+      - http://localhost:5173
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    allowed-headers:
+      - "*"
+    allow-credentials: true
+    max-age: 3600
+
+# Configuration Swagger/OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+  show-actuator: false
+
+# Configuration Logging
+logging:
+  level:
+    root: INFO
+    sn.pharmago: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/pharmago-api.log
+    max-size: 10MB
+    max-history: 30
+
+# Configuration Management (Actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+# Informations Application
+info:
+  app:
+    name: ${app.name}
+    version: ${app.version}
+    description: ${app.description}

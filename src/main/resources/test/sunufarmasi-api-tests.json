@@ -1,0 +1,776 @@
+{
+  "info": {
+    "name": "SunuFarmasi API - Tests Complets",
+    "description": "Collection complète pour tester l'API SunuFarmasi",
+    "version": "1.0.0"
+  },
+  
+  "variables": {
+    "baseUrl": "http://localhost:8080/api/v1",
+    "adminToken": "",
+    "pharmacienToken": "",
+    "employeToken": ""
+  },
+
+  "auth": {
+    "login_admin": {
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "email": "admin@sunufarmasi.sn",
+        "password": "password123"
+      }
+    },
+    "login_pharmacien": {
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/login",
+      "body": {
+        "email": "pharmacie.plateau@gmail.com",
+        "password": "password123"
+      }
+    },
+    "login_employe": {
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/login",
+      "body": {
+        "email": "employe1@sunufarmasi.sn",
+        "password": "password123"
+      }
+    },
+    "register": {
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/register",
+      "body": {
+        "email": "nouveau.pharmacien@test.sn",
+        "password": "password123",
+        "nom": "NDIAYE",
+        "prenom": "Mamadou",
+        "telephone": "+221771112233",
+        "role": "PHARMACIEN"
+      }
+    },
+    "refresh_token": {
+      "method": "POST",
+      "url": "{{baseUrl}}/auth/refresh",
+      "body": {
+        "refreshToken": "{{refreshToken}}"
+      }
+    }
+  },
+
+  "init_sans_auth": {
+    "creer_admin": {
+      "method": "POST",
+      "url": "{{baseUrl}}/init/admin",
+      "description": "Créer un admin sans authentification",
+      "params": {
+        "email": "admin@sunufarmasi.sn",
+        "password": "password123",
+        "prenom": "Admin",
+        "nom": "System",
+        "telephone": "+221770000000"
+      }
+    },
+    "creer_pharmacien": {
+      "method": "POST",
+      "url": "{{baseUrl}}/init/pharmacien",
+      "params": {
+        "email": "nouveau.pharmacien@test.sn",
+        "password": "password123",
+        "prenom": "Moussa",
+        "nom": "FALL",
+        "telephone": "+221771234567"
+      }
+    },
+    "hash_password": {
+      "method": "GET",
+      "url": "{{baseUrl}}/init/hash",
+      "params": {
+        "password": "password123"
+      }
+    },
+    "verify_password": {
+      "method": "POST",
+      "url": "{{baseUrl}}/init/verify-password",
+      "params": {
+        "email": "admin@sunufarmasi.sn",
+        "password": "password123"
+      }
+    },
+    "reset_password": {
+      "method": "POST",
+      "url": "{{baseUrl}}/init/reset-password",
+      "params": {
+        "email": "admin@sunufarmasi.sn",
+        "newPassword": "newpassword123"
+      }
+    },
+    "list_users": {
+      "method": "GET",
+      "url": "{{baseUrl}}/init/users"
+    },
+    "stats": {
+      "method": "GET",
+      "url": "{{baseUrl}}/init/stats"
+    }
+  },
+
+  "localisation_public": {
+    "liste_pays": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/pays"
+    },
+    "pays_par_code": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/pays/code/SN"
+    },
+    "regions_senegal": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/pays/code/SN/regions"
+    },
+    "liste_regions": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/regions"
+    },
+    "departements_dakar": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/regions/a1000000-0000-0000-0000-000000000001/departements",
+      "description": "Départements de la région Dakar"
+    },
+    "liste_departements": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/departements"
+    },
+    "communes_departement_dakar": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/departements/b1000000-0000-0000-0000-000000000001/communes",
+      "description": "Communes du département de Dakar"
+    },
+    "liste_communes": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/communes"
+    },
+    "recherche_commune": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/communes/search",
+      "params": {
+        "q": "plateau"
+      }
+    },
+    "communes_proximite": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/communes/proximite",
+      "params": {
+        "latitude": "14.6937",
+        "longitude": "-17.4441",
+        "rayonKm": "10"
+      }
+    }
+  },
+
+  "pharmacies": {
+    "liste_toutes": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies",
+      "auth": "Bearer {{adminToken}}"
+    },
+    "detail_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies/e1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{adminToken}}"
+    },
+    "pharmacies_proximite": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies/proximite",
+      "description": "Pharmacies proches de ma position (PUBLIC)",
+      "params": {
+        "latitude": "14.6937",
+        "longitude": "-17.4441",
+        "rayon": "5"
+      }
+    },
+    "pharmacies_garde_aujourdhui": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies/garde",
+      "description": "Pharmacies de garde aujourd'hui (PUBLIC)"
+    },
+    "pharmacies_par_commune": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies/commune/c1000000-0000-0000-0000-000000000001",
+      "description": "Pharmacies dans la commune du Plateau"
+    },
+    "pharmacies_par_syndicat": {
+      "method": "GET",
+      "url": "{{baseUrl}}/pharmacies/syndicat/d1000000-0000-0000-0000-000000000001",
+      "description": "Pharmacies du syndicat de Dakar"
+    },
+    "creer_pharmacie": {
+      "method": "POST",
+      "url": "{{baseUrl}}/admin/pharmacies",
+      "auth": "Bearer {{adminToken}}",
+      "body": {
+        "code": "PH-DK-NEW",
+        "nom": "Nouvelle Pharmacie Test",
+        "adresse": "123 Avenue Test, Dakar",
+        "telephone": "+221339999999",
+        "email": "nouvelle.pharmacie@test.sn",
+        "latitude": 14.7000,
+        "longitude": -17.4500,
+        "communeId": "c1000000-0000-0000-0000-000000000001",
+        "syndicatId": "d1000000-0000-0000-0000-000000000001",
+        "horaireOuverture": "08:00",
+        "horaireFermeture": "20:00",
+        "ouverteDimanche": false
+      }
+    }
+  },
+
+  "gardes": {
+    "gardes_aujourdhui": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/aujourd-hui",
+      "description": "Gardes du jour (PUBLIC)"
+    },
+    "gardes_semaine": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/semaine",
+      "description": "Gardes de la semaine (PUBLIC)"
+    },
+    "gardes_proximite": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/proximite",
+      "description": "Pharmacies de garde proches de moi (PUBLIC)",
+      "params": {
+        "latitude": "14.6937",
+        "longitude": "-17.4441",
+        "rayonKm": "10"
+      }
+    },
+    "gardes_par_commune": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/commune/c1000000-0000-0000-0000-000000000001",
+      "description": "Pharmacies de garde dans ma commune (Plateau)"
+    },
+    "gardes_par_departement": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/departement/b1000000-0000-0000-0000-000000000001",
+      "description": "Pharmacies de garde dans mon département (Dakar)"
+    },
+    "gardes_par_zone": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/zone",
+      "description": "Pharmacies de garde par nom de zone",
+      "params": {
+        "zone": "Plateau"
+      }
+    },
+    "gardes_par_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/gardes/pharmacie/e1000000-0000-0000-0000-000000000001",
+      "description": "Historique gardes d'une pharmacie",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "creer_garde": {
+      "method": "POST",
+      "url": "{{baseUrl}}/admin/gardes",
+      "auth": "Bearer {{adminToken}}",
+      "body": {
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "planningId": "pg000000-0000-0000-0000-000000000002",
+        "dateGarde": "2025-01-15",
+        "typeGarde": "JOUR_24H",
+        "heureDebut": "00:00",
+        "heureFin": "23:59",
+        "zone": "Plateau"
+      }
+    }
+  },
+
+  "produits": {
+    "liste_produits": {
+      "method": "GET",
+      "url": "{{baseUrl}}/produits",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "recherche_produit": {
+      "method": "GET",
+      "url": "{{baseUrl}}/produits/search",
+      "description": "Rechercher un produit par nom",
+      "params": {
+        "q": "paracetamol"
+      }
+    },
+    "produit_par_code": {
+      "method": "GET",
+      "url": "{{baseUrl}}/produits/code/PARA500"
+    },
+    "produit_par_code_barre": {
+      "method": "GET",
+      "url": "{{baseUrl}}/produits/code-barre/3400930002001"
+    },
+    "produits_par_categorie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/produits/categorie/ca000000-0000-0000-0000-000000000003",
+      "description": "Produits de la catégorie Antalgiques"
+    },
+    "creer_produit": {
+      "method": "POST",
+      "url": "{{baseUrl}}/admin/produits",
+      "auth": "Bearer {{adminToken}}",
+      "body": {
+        "code": "NOUVEAU001",
+        "codeBarre": "3400930099001",
+        "designation": "Nouveau Médicament Test",
+        "forme": "COMPRIME",
+        "dosage": "500mg",
+        "conditionnement": "Boîte de 20",
+        "prixAchat": 2000,
+        "prixVente": 3500,
+        "tva": 0,
+        "categorieId": "ca000000-0000-0000-0000-000000000003",
+        "ordonnanceRequise": false
+      }
+    }
+  },
+
+  "disponibilite_medicaments": {
+    "chercher_medicament_disponible": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/produit/p1000000-0000-0000-0000-000000000010",
+      "description": "Pharmacies qui ont du Paracétamol 500mg en stock (stock > 0)"
+    },
+    "chercher_par_code": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/code/PARA500",
+      "description": "Pharmacies avec Paracétamol 500mg par code produit"
+    },
+    "chercher_par_nom": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/search",
+      "description": "Chercher médicament par nom et voir où il est disponible",
+      "params": {
+        "q": "paracetamol"
+      }
+    },
+    "disponibilite_proximite": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/proximite",
+      "description": "Médicament disponible proche de moi",
+      "params": {
+        "produitId": "p1000000-0000-0000-0000-000000000010",
+        "latitude": "14.6937",
+        "longitude": "-17.4441",
+        "rayonKm": "5"
+      }
+    },
+    "disponibilite_par_code_proximite": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/code/PARA500/proximite",
+      "description": "Paracétamol disponible proche de moi",
+      "params": {
+        "latitude": "14.6937",
+        "longitude": "-17.4441",
+        "rayonKm": "10"
+      }
+    },
+    "disponibilite_commune": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/commune/c1000000-0000-0000-0000-000000000001",
+      "description": "Médicament disponible dans ma commune",
+      "params": {
+        "produitId": "p1000000-0000-0000-0000-000000000010"
+      }
+    },
+    "disponibilite_departement": {
+      "method": "GET",
+      "url": "{{baseUrl}}/public/disponibilite/departement/b1000000-0000-0000-0000-000000000001",
+      "description": "Médicament disponible dans mon département",
+      "params": {
+        "codeProduit": "PARA500"
+      }
+    }
+  },
+
+  "stocks": {
+    "stocks_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stocks/pharmacie/e1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stock_produit_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stocks/pharmacie/e1000000-0000-0000-0000-000000000001/produit/p1000000-0000-0000-0000-000000000010",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stocks_faibles": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stocks/alertes",
+      "description": "Stocks en dessous du seuil d'alerte",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stocks_critiques": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stocks/critiques",
+      "description": "Stocks en dessous du seuil critique",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stocks_peremption_proche": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stocks/peremption",
+      "description": "Stocks avec péremption proche (90 jours)",
+      "params": {
+        "joursAvant": "90"
+      },
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "ajouter_stock": {
+      "method": "POST",
+      "url": "{{baseUrl}}/stocks",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "produitId": "p1000000-0000-0000-0000-000000000001",
+        "quantite": 100,
+        "seuilAlerte": 20,
+        "seuilCritique": 10,
+        "lot": "LOT2025001",
+        "datePeremption": "2027-12-31",
+        "prixAchat": 1500,
+        "emplacement": "Étagère A1"
+      }
+    },
+    "mouvement_entree": {
+      "method": "POST",
+      "url": "{{baseUrl}}/stocks/mouvement/entree",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "stockId": "s1000000-0000-0000-0000-000000000001",
+        "quantite": 50,
+        "motif": "Réapprovisionnement",
+        "reference": "CMD-2025-00010"
+      }
+    },
+    "mouvement_sortie": {
+      "method": "POST",
+      "url": "{{baseUrl}}/stocks/mouvement/sortie",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "stockId": "s1000000-0000-0000-0000-000000000001",
+        "quantite": 5,
+        "motif": "Vente",
+        "reference": "VT-2025-00001"
+      }
+    }
+  },
+
+  "ventes": {
+    "liste_ventes": {
+      "method": "GET",
+      "url": "{{baseUrl}}/ventes",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "ventes_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/ventes/pharmacie/e1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "ventes_aujourdhui": {
+      "method": "GET",
+      "url": "{{baseUrl}}/ventes/aujourd-hui",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "detail_vente": {
+      "method": "GET",
+      "url": "{{baseUrl}}/ventes/v1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "creer_vente": {
+      "method": "POST",
+      "url": "{{baseUrl}}/ventes",
+      "auth": "Bearer {{employeToken}}",
+      "body": {
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "clientId": null,
+        "modePaiement": "ESPECES",
+        "mutuelleId": null,
+        "lignes": [
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000010",
+            "quantite": 2,
+            "remise": 0
+          },
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000040",
+            "quantite": 1,
+            "remise": 0
+          }
+        ]
+      }
+    },
+    "creer_vente_avec_mutuelle": {
+      "method": "POST",
+      "url": "{{baseUrl}}/ventes",
+      "auth": "Bearer {{employeToken}}",
+      "body": {
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "clientId": "00000000-0000-0000-0000-000000000030",
+        "modePaiement": "WAVE",
+        "mutuelleId": "m1000000-0000-0000-0000-000000000001",
+        "numeroMutuelle": "MUT-2024-12345",
+        "lignes": [
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000001",
+            "quantite": 1,
+            "remise": 0
+          },
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000020",
+            "quantite": 2,
+            "remise": 0
+          }
+        ]
+      }
+    }
+  },
+
+  "commandes": {
+    "liste_commandes": {
+      "method": "GET",
+      "url": "{{baseUrl}}/commandes",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "commandes_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/commandes/pharmacie/e1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "commandes_en_cours": {
+      "method": "GET",
+      "url": "{{baseUrl}}/commandes/en-cours",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "detail_commande": {
+      "method": "GET",
+      "url": "{{baseUrl}}/commandes/co000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "creer_commande": {
+      "method": "POST",
+      "url": "{{baseUrl}}/commandes",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "fournisseurId": "fo000000-0000-0000-0000-000000000001",
+        "dateLivraisonPrevue": "2025-01-20",
+        "notes": "Commande urgente",
+        "lignes": [
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000001",
+            "quantiteCommandee": 100,
+            "prixUnitaire": 1500
+          },
+          {
+            "produitId": "p1000000-0000-0000-0000-000000000010",
+            "quantiteCommandee": 200,
+            "prixUnitaire": 500
+          }
+        ]
+      }
+    },
+    "valider_commande": {
+      "method": "PUT",
+      "url": "{{baseUrl}}/commandes/co000000-0000-0000-0000-000000000001/valider",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "recevoir_commande": {
+      "method": "PUT",
+      "url": "{{baseUrl}}/commandes/co000000-0000-0000-0000-000000000001/recevoir",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "lignesRecues": [
+          {
+            "ligneId": "cl000000-0000-0000-0000-000000000001",
+            "quantiteRecue": 50
+          },
+          {
+            "ligneId": "cl000000-0000-0000-0000-000000000002",
+            "quantiteRecue": 10
+          }
+        ]
+      }
+    }
+  },
+
+  "mutuelles": {
+    "liste_mutuelles": {
+      "method": "GET",
+      "url": "{{baseUrl}}/mutuelles"
+    },
+    "detail_mutuelle": {
+      "method": "GET",
+      "url": "{{baseUrl}}/mutuelles/m1000000-0000-0000-0000-000000000001"
+    },
+    "creer_mutuelle": {
+      "method": "POST",
+      "url": "{{baseUrl}}/admin/mutuelles",
+      "auth": "Bearer {{adminToken}}",
+      "body": {
+        "code": "IPM-NOUVELLE",
+        "nom": "Nouvelle IPM Test",
+        "adresse": "Dakar",
+        "telephone": "+221338009999",
+        "email": "contact@nouvelle-ipm.sn",
+        "tauxPriseEnCharge": 75,
+        "plafondAnnuel": 500000
+      }
+    }
+  },
+
+  "syndicats": {
+    "liste_syndicats": {
+      "method": "GET",
+      "url": "{{baseUrl}}/syndicats",
+      "auth": "Bearer {{adminToken}}"
+    },
+    "detail_syndicat": {
+      "method": "GET",
+      "url": "{{baseUrl}}/syndicats/d1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{adminToken}}"
+    },
+    "pharmacies_syndicat": {
+      "method": "GET",
+      "url": "{{baseUrl}}/syndicats/d1000000-0000-0000-0000-000000000001/pharmacies",
+      "auth": "Bearer {{adminToken}}"
+    }
+  },
+
+  "employes": {
+    "liste_employes": {
+      "method": "GET",
+      "url": "{{baseUrl}}/employes",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "employes_pharmacie": {
+      "method": "GET",
+      "url": "{{baseUrl}}/employes/pharmacie/e1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "detail_employe": {
+      "method": "GET",
+      "url": "{{baseUrl}}/employes/f1000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "creer_employe": {
+      "method": "POST",
+      "url": "{{baseUrl}}/employes",
+      "auth": "Bearer {{pharmacienToken}}",
+      "body": {
+        "email": "nouvel.employe@test.sn",
+        "password": "password123",
+        "nom": "DIOP",
+        "prenom": "Aissatou",
+        "telephone": "+221779998877",
+        "pharmacieId": "e1000000-0000-0000-0000-000000000001",
+        "poste": "CAISSIER",
+        "typeContrat": "CDD",
+        "dateEmbauche": "2025-01-15",
+        "salaireBase": 180000
+      }
+    }
+  },
+
+  "notifications": {
+    "mes_notifications": {
+      "method": "GET",
+      "url": "{{baseUrl}}/notifications",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "notifications_non_lues": {
+      "method": "GET",
+      "url": "{{baseUrl}}/notifications/non-lues",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "marquer_lue": {
+      "method": "PUT",
+      "url": "{{baseUrl}}/notifications/n1000000-0000-0000-0000-000000000001/lue",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "marquer_toutes_lues": {
+      "method": "PUT",
+      "url": "{{baseUrl}}/notifications/toutes-lues",
+      "auth": "Bearer {{pharmacienToken}}"
+    }
+  },
+
+  "categories": {
+    "liste_categories": {
+      "method": "GET",
+      "url": "{{baseUrl}}/categories"
+    },
+    "categories_racines": {
+      "method": "GET",
+      "url": "{{baseUrl}}/categories/racines",
+      "description": "Catégories principales sans parent"
+    },
+    "sous_categories": {
+      "method": "GET",
+      "url": "{{baseUrl}}/categories/ca000000-0000-0000-0000-000000000001/sous-categories",
+      "description": "Sous-catégories de Médicaments"
+    }
+  },
+
+  "fournisseurs": {
+    "liste_fournisseurs": {
+      "method": "GET",
+      "url": "{{baseUrl}}/fournisseurs",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "detail_fournisseur": {
+      "method": "GET",
+      "url": "{{baseUrl}}/fournisseurs/fo000000-0000-0000-0000-000000000001",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "creer_fournisseur": {
+      "method": "POST",
+      "url": "{{baseUrl}}/admin/fournisseurs",
+      "auth": "Bearer {{adminToken}}",
+      "body": {
+        "code": "NEWFOUR",
+        "nom": "Nouveau Fournisseur",
+        "adresse": "Zone Industrielle, Dakar",
+        "telephone": "+221338888888",
+        "email": "contact@nouveau-fournisseur.sn",
+        "pays": "Sénégal"
+      }
+    }
+  },
+
+  "statistiques": {
+    "stats_ventes_jour": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stats/ventes/jour",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stats_ventes_mois": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stats/ventes/mois",
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stats_produits_top": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stats/produits/top",
+      "params": {
+        "limit": "10"
+      },
+      "auth": "Bearer {{pharmacienToken}}"
+    },
+    "stats_dashboard": {
+      "method": "GET",
+      "url": "{{baseUrl}}/stats/dashboard",
+      "auth": "Bearer {{pharmacienToken}}"
+    }
+  }
+}

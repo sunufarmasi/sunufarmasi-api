@@ -1,0 +1,1330 @@
+'""@startuml Diagramme_Classes_FAD_UCAD_Complet
+'!theme cerulean-outline
+'skinparam backgroundColor #FAFAFA
+'skinparam shadowing false
+'skinparam roundcorner 15
+'skinparam linetype ortho
+'
+'' Configuration du style moderne
+'skinparam class {
+'    BackgroundColor White
+'    BorderColor #2C3E50
+'    BorderThickness 2
+'    ArrowColor #3498DB
+'    ArrowThickness 2
+'    FontName "Segoe UI"
+'    FontSize 12
+'    AttributeFontSize 11
+'}
+'
+'skinparam package {
+'    BackgroundColor #ECF0F1
+'    BorderColor #34495E
+'    BorderThickness 2
+'    FontSize 14
+'    FontStyle bold
+'}
+'
+'skinparam note {
+'    BackgroundColor #FFF9C4
+'    BorderColor #F57F17
+'    FontSize 11
+'}
+'
+'skinparam classAttributeIconSize 0
+'skinparam minClassWidth 180
+'skinparam ranksep 100
+'skinparam nodesep 80
+'
+'' ==========================================
+'' PACKAGE UTILISATEURS
+'' ==========================================
+'package "👥 UTILISATEURS" #E8F5E9 {
+'
+'    abstract class Utilisateur {
+'        # id: Long <<PK>>
+'        --
+'        # email: String {unique}
+'        # motDePasse: String
+'        # nom: String
+'        # prenom: String
+'        # telephone: String
+'        # role: RoleEnum
+'        # actif: Boolean
+'        --
+'        + seConnecter()
+'        + deconnecter()
+'    }
+'
+'    class Apprenant {
+'        - dateNaissance: Date
+'        - adresse: String
+'        - profession: String
+'        --
+'        + creerCompte()
+'        + consulterCatalogue()
+'        + sInscrireMultiple()
+'        + suivreStatutInscription()
+'        + accederDocuments()
+'        + consulterTableauBord()
+'    }
+'
+'    class Formateur {
+'        - specialite: String
+'        - experience: Integer
+'        - cv: String
+'        --
+'        + consulterSessionsAssignees()
+'        + consulterListeEtudiants()
+'        + deposerDocument()
+'        + organiserParModules()
+'        + consulterChargeTravail()
+'    }
+'
+'    class Assistant {
+'        - specialite: String
+'        - competences: String
+'        --
+'        + consulterSessionsAssignees()
+'        + consulterListeEtudiants()
+'        + deposerDocument()
+'        + organiserParModules()
+'    }
+'
+'    class Comptable {
+'        - matricule: String
+'        - service: String
+'        --
+'        + consulterInscriptions()
+'        + validerPaiement()
+'        + genererRecu()
+'        + suivreImpayes()
+'        + suivreTranches()
+'        + genererRapport()
+'    }
+'
+'    class ResponsableFinancier {
+'        - departement: String
+'        --
+'        + consulterInscriptions()
+'        + suivreImpayes()
+'        + genererRapport()
+'        + genererAttestation()
+'        + impacterExoneration()
+'    }
+'
+'    class Administrateur {
+'        - niveauAcces: Integer
+'        --
+'        + consulterTableauBord()
+'        + gererUtilisateurs()
+'        + creerFormateur()
+'        + creerAssistant()
+'        + creerFormation()
+'        + attribuerFormateurSession()
+'        + attribuerAssistantSession()
+'        + gererLieux()
+'        + genererStatistiques()
+'    }
+'
+'    class Directeur {
+'        - fonction: String
+'        --
+'        + consulterCatalogues()
+'        + consulterListeEtudiants()
+'        + consulterPaiements()
+'        + validerExoneration()
+'        + consulterTableauxBord()
+'    }
+'}
+'
+'' ==========================================
+'' PACKAGE FORMATIONS
+'' ==========================================
+'package "📚 FORMATIONS" #E3F2FD {
+'
+'    class Formation {
+'        - id: Long <<PK>>
+'        --
+'        - titre: String
+'        - description: Text
+'        - duree: Integer
+'        - coutTotal: Decimal
+'        - prerequis: Text
+'        - actif: Boolean
+'        --
+'        + creer()
+'        + modifier()
+'        + getSessions()
+'    }
+'
+'    class SessionFormation {
+'        - id: Long <<PK>>
+'        - formationId: Long <<FK>>
+'        - lieuId: Long <<FK>> {nullable}
+'        --
+'        - code: String {unique}
+'        - dateDebut: Date
+'        - dateFin: Date
+'        - coutTotal: Decimal
+'        - paiementParTranches: Boolean
+'        - nombreTranches: Integer
+'        - modalite: ModaliteEnum
+'        - capaciteMax: Integer
+'        - nombreInscrits: Integer
+'        - statut: StatutSessionEnum
+'        --
+'        + creer()
+'        + publier()
+'        + attribuerLieu()
+'        + attribuerFormateur()
+'        + attribuerAssistant()
+'        + getInscrits()
+'    }
+'
+'    class SessionFormateur {
+'        - id: Long <<PK>>
+'        - sessionId: Long <<FK>>
+'        - formateurId: Long <<FK>>
+'        --
+'        - dateAffectation: Timestamp
+'        - estPrincipal: Boolean
+'        --
+'        + affecter()
+'        + retirer()
+'    }
+'
+'    class SessionAssistant {
+'        - id: Long <<PK>>
+'        - sessionId: Long <<FK>>
+'        - assistantId: Long <<FK>>
+'        --
+'        - dateAffectation: Timestamp
+'        - role: String
+'        --
+'        + affecter()
+'        + retirer()
+'    }
+'
+'    class Lieu {
+'        - id: Long <<PK>>
+'        --
+'        - nom: String
+'        - adresse: Text
+'        - salle: String
+'        - batiment: String
+'        - capacite: Integer
+'        - actif: Boolean
+'        --
+'        + creer()
+'        + modifier()
+'        + verifierDisponibilite()
+'    }
+'}
+'
+'' ==========================================
+'' PACKAGE INSCRIPTIONS & FINANCIER
+'' ==========================================
+'package "💰 INSCRIPTIONS & FINANCIER" #FFF3E0 {
+'
+'    class Inscription {
+'        - id: Long <<PK>>
+'        - apprenantId: Long <<FK>>
+'        - sessionId: Long <<FK>>
+'        --
+'        - numeroInscription: String
+'        - dateInscription: Timestamp
+'        - statut: StatutInscriptionEnum
+'        --
+'        + creer()
+'        + valider()
+'        + getStatut()
+'    }
+'
+'    class Paiement {
+'        - id: Long <<PK>>
+'        - inscriptionId: Long <<FK>>
+'        - comptableId: Long <<FK>>
+'        --
+'        - numeroPaiement: String
+'        - montantTotal: Decimal
+'        - montantPaye: Decimal
+'        - montantRestant: Decimal
+'        - montantExonere: Decimal
+'        - modePaiement: ModePaiementEnum
+'        - estComplet: Boolean
+'        --
+'        + validerPaiement()
+'        + calculerRestant()
+'        + verifierComplet()
+'        + appliquerExoneration()
+'    }
+'
+'    class TranchePaiement {
+'        - id: Long <<PK>>
+'        - paiementId: Long <<FK>>
+'        --
+'        - numeroTranche: Integer
+'        - montant: Decimal
+'        - dateEcheance: Date
+'        - estPayee: Boolean
+'        --
+'        + enregistrerPaiement()
+'        + verifierRetard()
+'    }
+'
+'    class Recu {
+'        - id: Long <<PK>>
+'        - paiementId: Long <<FK>>
+'        --
+'        - numero: String {unique}
+'        - montant: Decimal
+'        - dateEmission: Timestamp
+'        - cheminFichier: String
+'        --
+'        + genererAutomatique()
+'        + editer()
+'        + telecharger()
+'    }
+'
+'    class Exoneration {
+'        - id: Long <<PK>>
+'        - inscriptionId: Long <<FK>>
+'        - respFinancierId: Long <<FK>>
+'        - directeurId: Long <<FK>>
+'        --
+'        - numeroExoneration: String
+'        - motif: Text
+'        - montantExonere: Decimal
+'        - statut: StatutExonerationEnum
+'        --
+'        + impacter()
+'        + valider()
+'        + rejeter()
+'    }
+'}
+'
+'' ==========================================
+'' PACKAGE PÉDAGOGIQUE
+'' ==========================================
+'package "📖 PÉDAGOGIQUE" #F3E5F5 {
+'
+'    class DocumentPedagogique {
+'        - id: Long <<PK>>
+'        - sessionId: Long <<FK>>
+'        - deposantId: Long <<FK>>
+'        --
+'        - titre: String
+'        - module: String
+'        - chapitre: String
+'        - type: String
+'        - format: String
+'        - cheminFichier: String
+'        --
+'        + deposer()
+'        + organiserParModules()
+'        + telecharger()
+'        + verifierAcces()
+'    }
+'
+'    class Attestation {
+'        - id: Long <<PK>>
+'        - apprenantId: Long <<FK>>
+'        - sessionId: Long <<FK>>
+'        - respFinancierId: Long <<FK>>
+'        --
+'        - numero: String {unique}
+'        - dateEmission: Timestamp
+'        - cheminFichier: String
+'        --
+'        + generer()
+'        + telecharger()
+'    }
+'}
+'
+'' ==========================================
+'' PACKAGE TRAÇABILITÉ
+'' ==========================================
+'package "🔍 TRAÇABILITÉ" #FFEBEE {
+'
+'    class AuditLog {
+'        - id: Long <<PK>>
+'        - utilisateurId: Long <<FK>>
+'        --
+'        - typeAction: String
+'        - entite: String
+'        - entiteId: Long
+'        - dateHeure: Timestamp
+'        --
+'        + enregistrer()
+'    }
+'}
+'
+'' ==========================================
+'' ÉNUMÉRATIONS
+'' ==========================================
+'enum RoleEnum {
+'    APPRENANT
+'    FORMATEUR
+'    ASSISTANT
+'    COMPTABLE
+'    RESPONSABLE_FINANCIER
+'    ADMINISTRATEUR
+'    DIRECTEUR
+'}
+'
+'enum ModaliteEnum {
+'    PRESENTIEL
+'    EN_LIGNE
+'    HYBRIDE
+'}
+'
+'enum StatutInscriptionEnum {
+'    EN_ATTENTE
+'    VALIDEE
+'    ANNULEE
+'}
+'
+'enum StatutSessionEnum {
+'    BROUILLON
+'    PUBLIEE
+'    EN_COURS
+'    TERMINEE
+'    ANNULEE
+'}
+'
+'enum ModePaiementEnum {
+'    ESPECES
+'    MOBILE_MONEY
+'    CHEQUE
+'    VIREMENT
+'}
+'
+'enum StatutExonerationEnum {
+'    EN_ATTENTE
+'    VALIDEE
+'    REJETEE
+'}
+'
+'' ==========================================
+'' RELATIONS D'HÉRITAGE
+'' ==========================================
+'Utilisateur <|-- Apprenant
+'Utilisateur <|-- Formateur
+'Utilisateur <|-- Assistant
+'Utilisateur <|-- Comptable
+'Utilisateur <|-- ResponsableFinancier
+'Utilisateur <|-- Administrateur
+'Utilisateur <|-- Directeur
+'
+'' ==========================================
+'' RELATIONS FORMATIONS (avec FK visibles)
+'' ==========================================
+'Formation "1" *-- "0..*" SessionFormation : < contient
+''note on link
+''    FK: formationId
+''end note
+'
+'SessionFormation "0..*" o-- "0..1" Lieu : < se déroule à
+''note on link
+''    FK: lieuId (nullable)
+''    Peut être défini après création
+''end note
+'
+''SessionFormation "1" -- "0..*" SessionFormateur : < formateurs
+''note on link
+''    FK: sessionId
+''end note
+'
+''Formateur "1" -- "0..*" SessionFormateur : assigné à >
+''note on link
+''    FK: formateurId
+''end note
+'
+''SessionFormation "1" -- "0..*" SessionAssistant : < assistants
+''note on link
+''    FK: sessionId
+''end note
+'
+''Assistant "1" -- "0..*" SessionAssistant : assigné à >
+''note on link
+''    FK: assistantId
+''end note
+'
+'' ==========================================
+'' RELATIONS INSCRIPTIONS (avec FK visibles)
+'' ==========================================
+'Apprenant "1" -- "0..*" Inscription : effectue >
+''note on link
+''    FK: apprenantId
+''    Inscription multiple simultanée
+''end note
+'
+'SessionFormation "1" -- "0..*" Inscription : < concerne
+''note on link
+''    FK: sessionId
+''end note
+'
+'' ==========================================
+'' RELATIONS FINANCIER (avec FK visibles)
+'' ==========================================
+'Inscription "1" *-- "1" Paiement : < possède
+''note on link
+''    FK: inscriptionId
+''end note
+'
+'Paiement "1" *-- "0..*" TranchePaiement : < composé de
+''note on link
+''    FK: paiementId
+''end note
+'
+'Paiement "1" -- "0..*" Recu : < génère
+''note on link
+''    FK: paiementId
+''end note
+'
+'Comptable "1" -- "0..*" Paiement : valide >
+''note on link
+''    FK: comptableId
+''end note
+'
+'Inscription "1" -- "0..1" Exoneration : < bénéficie de
+''note on link
+''    FK: inscriptionId
+''end note
+'
+'ResponsableFinancier "1" -- "0..*" Exoneration : impacte >
+''note on link
+''    FK: respFinancierId
+''end note
+'
+'Directeur "1" -- "0..*" Exoneration : valide >
+''note on link
+''    FK: directeurId
+''end note
+'
+'' ==========================================
+'' RELATIONS PÉDAGOGIQUE (avec FK visibles)
+'' ==========================================
+'SessionFormation "1" *-- "0..*" DocumentPedagogique : < contient
+''note on link
+''    FK: sessionId
+''end note
+'
+'Formateur "1" -- "0..*" DocumentPedagogique : dépose >
+''Utilisateur "1" -- "0..*" DocumentPedagogique : dépose >
+''note on link
+''    FK: deposantId
+''    (Formateur ou Assistant)
+''end note
+'
+'Apprenant "1" -- "0..*" Attestation : reçoit >
+''note on link
+''    FK: apprenantId
+''end note
+'
+'SessionFormation "1" -- "0..*" Attestation : < délivre
+''note on link
+''    FK: sessionId
+''end note
+'
+'ResponsableFinancier "1" -- "0..*" Attestation : génère >
+''note on link
+''    FK: respFinancierId
+''end note
+'
+'' ==========================================
+'' RELATIONS TRAÇABILITÉ (avec FK visibles)
+'' ==========================================
+'Utilisateur "1" -- "0..*" AuditLog : génère >
+''note on link
+''    FK: utilisateurId
+''end note
+'
+'' ==========================================
+'' NOTES FONCTIONNELLES DÉTAILLÉES
+'' ==========================================
+''note top of Apprenant
+''    <b>📝 MODULE ÉTUDIANT</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Inscription:</b>
+''    ✓ Création compte
+''    ✓ Consultation catalogue (filtres)
+''    ✓ Inscription MULTIPLE simultanée
+''    ✓ Génération auto demande/session
+''
+''    <b>Tableau de bord:</b>
+''    ✓ Vue d'ensemble sessions
+''    ✓ Statut: EN_ATTENTE/VALIDEE
+''    ✓ Détails formations
+''    ✓ Documents (après validation)
+''end note
+'
+''note top of Comptable
+''    <b>💰 MODULE COMPTABLE</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Gestion paiements:</b>
+''    ✓ Liste inscriptions catégorisée
+''    ✓ Formulaire validation:
+''      • Montant payé
+''      • Mode paiement
+''      • Nombre tranches
+''      • Détail tranches restantes
+''    ✓ Génération auto reçu
+''    ✓ Edition/Téléchargement reçu
+''    ✓ Marquage VALIDEE
+''
+''    <b>Suivi financier:</b>
+''    ✓ Historique paiements
+''    ✓ Paiements par tranches
+''    ✓ Rapports financiers
+''end note
+'
+''note bottom of Administrateur
+''    <b>⚙️ MODULE ADMINISTRATEUR</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Gestion globale:</b>
+''    ✓ Tableau de bord stats
+''    ✓ Gestion utilisateurs
+''
+''    <b>Formateurs/Assistants:</b>
+''    ✓ Création/modification profils
+''    ✓ Activation/désactivation
+''    ✓ Historique formations
+''
+''    <b>Formations:</b>
+''    ✓ Création formation + sessions
+''    ✓ Infos complètes obligatoires
+''    ✓ Attribution formateurs
+''    ✓ Attribution assistants (optionnel)
+''
+''    <b>Gestion lieux:</b>
+''    ✓ Ajout/modification lieu
+''    ✓ Pour sessions présentielles
+''    ✓ Peut être défini APRÈS création
+''
+''    <b>Rapports:</b>
+''    ✓ Inscriptions par session
+''    ✓ Participants à jour
+''    ✓ Impayés
+''    ✓ Stats financières
+''    ✓ Performance formations
+''end note
+'
+''note top of Formateur
+''    <b>👨‍🏫 MODULE FORMATEUR</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Espace personnel:</b>
+''    ✓ Sessions assignées
+''    ✓ Liste étudiants/session
+''    ✓ Dépôt documents
+''    ✓ Organisation modules/chapitres
+''    ✓ Vue charge travail
+''end note
+'
+''note top of Assistant
+''    <b>👨‍💼 MODULE ASSISTANT</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Espace personnel:</b>
+''    ✓ Sessions assignées
+''    ✓ Liste étudiants/session
+''    ✓ Dépôt documents
+''    ✓ Organisation modules/chapitres
+''end note
+'
+''note top of Directeur
+''    <b>👔 MODULE DIRECTEUR</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    ✓ Catalogues formations/sessions
+''    ✓ Liste étudiants inscrits
+''    ✓ Consultation paiements
+''    ✓ Validation exonérations
+''    ✓ Tableaux de bord
+''      (inscriptions, paiements, attestations)
+''end note
+'
+''note right of SessionFormation
+''    <b>📋 Informations Session</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Obligatoires à création:</b>
+''    ✓ Titre et description
+''    ✓ Durée et période
+''    ✓ Coût total
+''    ✓ Paiement tranches (Oui/Non)
+''    ✓ Nombre de tranches
+''    ✓ Type (Présentiel/En ligne/Hybride)
+''    ✓ Capacité maximale
+''    ✓ Prérequis
+''    ✓ Attribution formateur(s)
+''    ✓ Attribution assistant(s) (optionnel)
+''
+''    <b>Ajoutées ultérieurement:</b>
+''    ✓ Lieu (si présentiel)
+''      → Peut être défini après création
+''end note
+'
+''note left of Lieu
+''    <b>📍 Gestion Lieux</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Pour sessions PRÉSENTIELLES</b>
+''
+''    Informations:
+''    ✓ Adresse complète
+''    ✓ Salle/bâtiment
+''    ✓ Capacité lieu
+''
+''    <b>Affectation:</b>
+''    Peut être définie APRÈS
+''    création de la session
+''end note
+'
+''note bottom of Paiement
+''    <b>💳 Validation Paiement</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Formulaire comptable:</b>
+''    • Montant payé
+''    • Mode paiement
+''    • Nombre tranches (si applicable)
+''    • Détail tranches restantes
+''
+''    <b>Action:</b>
+''    1. Génération auto reçu prérempli
+''    2. Edition/Téléchargement
+''    3. Signature et cachet
+''    4. Marquage inscription VALIDEE
+''
+''    <b>Exonérations intégrées</b>
+''end note
+'
+''note right of DocumentPedagogique
+''    <b>📚 Documents Pédagogiques</b>
+''    ━━━━━━━━━━━━━━━━━━━━━
+''    <b>Dépôt:</b>
+''    • Formateur ou Assistant
+''
+''    <b>Organisation:</b>
+''    • Par modules
+''    • Par chapitres
+''
+''    <b>Accès:</b>
+''    Uniquement apprenants
+''    avec inscription VALIDEE
+''end note
+'
+'legend right
+'    <b><size:14>🎨 LÉGENDE</size></b>
+'    ━━━━━━━━━━━━━━━━━━━━━
+'
+'    <b>Packages:</b>
+'    <color:#E8F5E9>█</color> Utilisateurs (7 rôles)
+'    <color:#E3F2FD>█</color> Formations
+'    <color:#FFF3E0>█</color> Financier
+'    <color:#F3E5F5>█</color> Pédagogique
+'    <color:#FFEBEE>█</color> Traçabilité
+'
+'    <b>Relations annotées:</b>
+'    Toutes les FK sont
+'    explicitées sur les relations
+'
+'    <b>Cardinalités:</b>
+'    1 = Un
+'    0..1 = Zéro ou un
+'    0..* = Zéro à plusieurs
+'endlegend
+'
+'@enduml
+
+
+
+@startuml Diagramme_Classes_FAD_UCAD_Final
+!theme cerulean-outline
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+skinparam roundcorner 15
+skinparam linetype polyline
+
+!define TABLE(name) class name << (T,#FFAAAA) >>
+!define PK(x) <b><color:red>PK:</color> x</b>
+!define FK(x) <color:blue>FK:</color> x
+
+title Formations Payantes - Modèle de Base de Données Complet
+
+
+' Style moderne épuré
+skinparam class {
+    BackgroundColor White
+    BorderColor #2C3E50
+    BorderThickness 2
+    ArrowColor #3498DB
+    ArrowThickness 2
+    FontName "Segoe UI"
+    FontSize 13
+    AttributeFontSize 12
+}
+
+skinparam package {
+    BackgroundColor #ECF0F1
+    BorderColor #34495E
+    BorderThickness 2
+    FontSize 15
+    FontStyle bold
+}
+
+skinparam arrow {
+    Thickness 2.5
+    Color #3498DB
+}
+
+skinparam classAttributeIconSize 0
+skinparam minClassWidth 200
+skinparam ranksep 180
+skinparam nodesep 150
+
+' ==========================================
+' PACKAGE UTILISATEURS
+' ==========================================
+package "👥 UTILISATEURS" #E8F5E9 {
+
+    abstract class Utilisateur {
+        # PK(id): Long
+        --
+        # email: String
+        # motDePasse: String
+        # nom: String
+        # prenom: String
+        # telephone: String
+        # role: RoleEnum
+        # actif: Boolean
+    }
+
+    class Apprenant {
+        - dateNaissance: Date
+        - adresse: String
+        - profession: String
+        - ville: String
+        - pays: String
+        --
+        + creerCompte()
+        + consulterCatalogue()
+        + sInscrireMultiple()
+        + suivreStatutInscription()
+        + accederDocuments()
+        + consulterTableauBord()
+    }
+
+    class Formateur {
+'        - specialite: String
+'        - experience: Integer
+        --
+        + consulterSessionsAssignees()
+        + consulterListeEtudiants()
+        + deposerDocument()
+        + organiserParModules()
+        + consulterChargeTravail()
+    }
+
+    class Assistant {
+'        - specialite: String
+'        - experience: Integer
+        --
+        + consulterSessionsAssignees()
+        + consulterListeEtudiants()
+        + deposerDocument()
+        + organiserParModules()
+    }
+
+    class Comptable {
+'        - matricule: String
+'        - service: String
+        --
+        + consulterInscriptions()
+        + validerPaiement()
+        + genererRecu()
+        + suivreImpayes()
+        + suivreTranches()
+        + genererRapport()
+    }
+
+    class ResponsableFinancier {
+'        - departement: String
+        --
+        + consulterInscriptions()
+        + suivreImpayes()
+        + genererRapport()
+        + genererAttestation()
+        + impacterExoneration()
+    }
+
+    class Administrateur {
+'        - niveauAcces: Integer
+        --
+        + consulterTableauBord()
+        + gererUtilisateurs()
+        + creerFormateur()
+        + creerAssistant()
+        + creerFormation()
+        + attribuerFormateurSession()
+        + attribuerAssistantSession()
+        + gererLieux()
+        + genererStatistiques()
+    }
+
+    class Directeur {
+'        - fonction: String
+        --
+        + consulterCatalogues()
+        + consulterListeEtudiants()
+        + consulterPaiements()
+        + validerExoneration()
+        + consulterTableauxBord()
+    }
+}
+
+' ==========================================
+' PACKAGE FORMATIONS
+' ==========================================
+package "📚 FORMATIONS" #E3F2FD {
+
+    class Formation {
+        - id: Long
+        --
+        - titre: String
+        - description: Text
+        - duree: Integer
+        - prerequis: Text
+        - actif: Boolean
+    }
+
+    class SessionFormation {
+        - id: Long
+'        - FK(formationId): Long
+'        - lieuId: Long <<FK>>
+        --
+        - code: String
+        - dateDebut: Date
+        - dateFin: Date
+        - coutTotal: Decimal
+        - paiementParTranches: Boolean
+        - nombreTranches: Integer
+        - modalite: ModaliteEnum
+        - capaciteMax: Integer
+        - nombreInscrits: Integer
+        - statut: StatutSessionEnum
+    }
+
+    class SeanceFormation {
+        - id: Long
+'        - sessionId: Long <<FK>>
+'        - formateurId: Long <<FK>>
+'        - lieuId: Long <<FK>>
+        --
+        - numero: Integer
+        - titre: String
+        - date: Date
+        - heureDebut: Time
+        - heureFin: Time
+        - modalite: ModaliteEnum
+        - lienVisio: String
+        - statut: StatutSeanceEnum
+    }
+
+    class SessionFormateur {
+        - id: Long
+'        - sessionId: Long <<FK>>
+'        - formateurId: Long <<FK>>
+        --
+        - estPrincipal: Boolean
+        - dateAffectation: Timestamp
+    }
+
+    class SessionAssistant {
+        - id: Long
+'        - sessionId: Long <<FK>>
+'        - assistantId: Long <<FK>>
+        --
+        - role: String
+        - dateAffectation: Timestamp
+    }
+
+    class Lieu {
+        - id: Long
+        --
+        - nom: String
+        - adresse: Text
+        - salle: String
+        - batiment: String
+        - capacite: Integer
+        - actif: Boolean
+    }
+}
+
+' ==========================================
+' PACKAGE INSCRIPTIONS & FINANCIER
+' ==========================================
+package "💰 INSCRIPTIONS & FINANCIER" #FFF3E0 {
+
+    class Inscription {
+        - id: Long
+'        - apprenantId: Long <<FK>>
+'        - sessionId: Long <<FK>>
+        --
+        - numeroInscription: String
+        - dateInscription: Timestamp
+        - statut: StatutInscriptionEnum
+    }
+
+    class Paiement {
+        - id: Long
+'        - inscriptionId: Long <<FK>>
+'        - comptableId: Long <<FK>>
+        --
+        - numeroPaiement: String
+        - montantTotal: Decimal
+        - montantPaye: Decimal
+        - montantRestant: Decimal
+        - montantExonere: Decimal
+        - modePaiement: ModePaiementEnum
+        - estComplet: Boolean
+    }
+
+    class TranchePaiement {
+        - id: Long
+'        - paiementId: Long <<FK>>
+        --
+        - numeroTranche: Integer
+        - montant: Decimal
+        - dateEcheance: Date
+        - estPayee: Boolean
+    }
+
+    class Recu {
+        - id: Long
+'        - paiementId: Long <<FK>>
+        --
+        - numero: String
+        - montant: Decimal
+        - dateEmission: Timestamp
+        - cheminFichier: String
+    }
+
+    class Exoneration {
+        - id: Long
+'        - inscriptionId: Long <<FK>>
+'        - respFinancierId: Long <<FK>>
+'        - directeurId: Long <<FK>>
+        --
+        - numeroExoneration: String
+        - motif: Text
+        - montantExonere: Decimal
+        - statut: StatutExonerationEnum
+    }
+}
+
+' ==========================================
+' PACKAGE PÉDAGOGIQUE
+' ==========================================
+package "📖 PÉDAGOGIQUE" #F3E5F5 {
+
+    class DocumentPedagogique {
+        - id: Long
+'        - sessionId: Long <<FK>>
+'        - deposantId: Long <<FK>>
+        --
+        - titre: String
+        - module: String
+        - chapitre: String
+        - type: String
+        - format: String
+        - cheminFichier: String
+    }
+
+    class Attestation {
+        - id: Long
+'        - apprenantId: Long <<FK>>
+'        - sessionId: Long <<FK>>
+'        - respFinancierId: Long <<FK>>
+        --
+        - numero: String
+        - dateEmission: Timestamp
+        - cheminFichier: String
+    }
+}
+
+' ==========================================
+' PACKAGE TRAÇABILITÉ
+' ==========================================
+package "🔍 TRAÇABILITÉ" #FFEBEE {
+
+    class AuditLog {
+        - id: Long
+'        - utilisateurId: Long <<FK>>
+        --
+        - typeAction: String
+        - entite: String
+        - entiteId: Long
+        - dateHeure: Timestamp
+    }
+}
+
+' ==========================================
+' ÉNUMÉRATIONS (compactes)
+' ==========================================
+enum RoleEnum {
+    APPRENANT
+    FORMATEUR
+    ASSISTANT
+    COMPTABLE
+    RESPONSABLE_FINANCIER
+    ADMINISTRATEUR
+    DIRECTEUR
+}
+
+enum ModaliteEnum {
+    PRESENTIEL
+    EN_LIGNE
+    HYBRIDE
+}
+
+enum StatutInscriptionEnum {
+    EN_ATTENTE
+    VALIDEE
+    ANNULEE
+}
+
+enum StatutSessionEnum {
+    BROUILLON
+    PUBLIEE
+    EN_COURS
+    TERMINEE
+    ANNULEE
+}
+
+enum StatutSeanceEnum {
+    PLANIFIEE
+    EN_COURS
+    TERMINEE
+    ANNULEE
+}
+
+enum ModePaiementEnum {
+    ESPECES
+    MOBILE_MONEY
+    CHEQUE
+    VIREMENT
+}
+
+enum StatutExonerationEnum {
+    EN_ATTENTE
+    VALIDEE
+    REJETEE
+}
+
+' ==========================================
+' RELATIONS D'HÉRITAGE (triangles clairs)
+' ==========================================
+Utilisateur <|-- Apprenant
+Utilisateur <|-- Formateur
+Utilisateur <|-- Assistant
+Utilisateur <|-- Comptable
+Utilisateur <|-- ResponsableFinancier
+Utilisateur <|-- Administrateur
+Utilisateur <|-- Directeur
+
+' ==========================================
+' RELATIONS FORMATIONS
+' ==========================================
+
+' Formation contient SessionFormation (composition)
+Formation "1" *-down- "0..*" SessionFormation : contient ▼
+
+' SessionFormation décomposée en SeanceFormation (composition)
+SessionFormation "1" *-down- "0..*" SeanceFormation : décomposée en ▼
+
+' SessionFormation liée à Lieu (agrégation - nullable)
+SessionFormation "0..*" o-right- "0..1" Lieu : se déroule à ▶
+
+' Tables d'association Formateurs
+'SessionFormation "1" -down- "0..*" SessionFormateur : formateurs ▼
+'Formateur "1" -right- "0..*" SessionFormateur : assigné à ▶
+
+' Tables d'association Assistants
+'SessionFormation "1" -down- "0..*" SessionAssistant : assistants ▼
+'Assistant "1" -right- "0..*" SessionAssistant : assigné à ▶
+
+' SeanceFormation liée à Formateur
+'SeanceFormation "0..*" -up- "1" Formateur : animée par ▲
+
+' SeanceFormation liée à Lieu (agrégation)
+SeanceFormation "0..*" o-right- "0..1" Lieu : se déroule à ▶
+
+' ==========================================
+' RELATIONS INSCRIPTIONS
+' ==========================================
+
+' Apprenant effectue Inscription
+Apprenant "1" -down- "0..*" Inscription : effectue ▼
+
+' SessionFormation concerne Inscription
+SessionFormation "1" -down- "0..*" Inscription : concerne ▼
+
+' ==========================================
+' RELATIONS FINANCIER
+' ==========================================
+
+' Inscription possède Paiement (composition 1:1)
+Inscription "1" *-right- "1" Paiement : possède ▶
+
+' Paiement composé de TranchePaiement (composition)
+Paiement "1" *-down- "0..*" TranchePaiement : composé de ▼
+
+' Paiement génère Recu
+Paiement "1" -down- "0..*" Recu : génère ▼
+
+' Comptable valide Paiement
+Comptable "1" -down- "0..*" Paiement : valide ▼
+
+' Inscription bénéficie Exoneration
+Inscription "1" -right- "0..1" Exoneration : bénéficie de ▶
+
+' ResponsableFinancier impacte Exoneration
+ResponsableFinancier "1" -down- "0..*" Exoneration : impacte ▼
+
+' Directeur valide Exoneration
+Directeur "1" -down- "0..*" Exoneration : valide ▼
+
+' ==========================================
+' RELATIONS PÉDAGOGIQUE
+' ==========================================
+
+' SessionFormation contient DocumentPedagogique (composition)
+SessionFormation "1" *-down- "0..*" DocumentPedagogique : contient ▼
+
+' Utilisateur (Formateur/Assistant) dépose DocumentPedagogique
+'Utilisateur "1" -down- "0..*" DocumentPedagogique : dépose ▼
+
+' Apprenant reçoit Attestation
+Apprenant "1" -down- "0..*" Attestation : reçoit ▼
+
+' SessionFormation délivre Attestation
+SessionFormation "1" -down- "0..*" Attestation : délivre ▼
+
+' ResponsableFinancier génère Attestation
+ResponsableFinancier "1" -down- "0..*" Attestation : génère ▼
+
+' ==========================================
+' RELATIONS TRAÇABILITÉ
+' ==========================================
+
+' Utilisateur génère AuditLog
+Utilisateur "1" -down- "0..*" AuditLog : génère ▼
+
+' ==========================================
+' NOTES EXPLICATIVES
+' ==========================================
+
+'note top of Utilisateur
+'    <b>🔑 Classe Parent Abstraite</b>
+'
+'    7 rôles héritent de cette classe
+'end note
+
+'note right of SessionFormateur
+'    <b>🔗 Association</b>
+'
+'    Formateurs → Sessions
+'
+'    • 1 formateur → N sessions
+'    • 1 session → N formateurs
+'    • 1 PRINCIPAL requis
+'end note
+
+'note right of SessionAssistant
+'    <b>🔗 Association</b>
+'
+'    Assistants → Sessions
+'
+'    • 1 assistant → N sessions
+'    • 1 session → N assistants
+'end note
+
+'note bottom of SeanceFormation
+'    <b>📅 Séances</b>
+'
+'    Session décomposée en séances
+'
+'    <b>Modalité/séance:</b>
+'    • PRESENTIEL → Lieu
+'    • EN_LIGNE → Visio
+'    • HYBRIDE → Les 2
+'end note
+
+'note right of Lieu
+'    <b>📍 Lieux</b>
+'
+'    Pour sessions/séances
+'    PRÉSENTIELLES
+'
+'    Nullable (défini après)
+'end note
+
+'note bottom of Inscription
+'    <b>📋 Statuts</b>
+'
+'    • EN_ATTENTE
+'    • VALIDEE
+'    • ANNULEE
+'end note
+
+'note right of Paiement
+'    <b>💳 Paiements</b>
+'
+'    • Complet
+'    • Par tranches
+'    • Exonérations
+'
+'    Modes: Espèces,
+'    Mobile Money, etc.
+'end note
+
+'note bottom of DocumentPedagogique
+'    <b>📚 Documents</b>
+'
+'    Déposé par:
+'    Formateur/Assistant
+'
+'    Organisation:
+'    Module/Chapitre
+'
+'    Accès: Si VALIDEE
+'end note
+
+legend right
+    <b><size:15>🎨 LÉGENDE</size></b>
+    ━━━━━━━━━━━━━━━━━━━━━
+
+    <b>Packages:</b>
+    <color:#E8F5E9>█</color> Utilisateurs
+    <color:#E3F2FD>█</color> Formations
+    <color:#FFF3E0>█</color> Financier
+    <color:#F3E5F5>█</color> Pédagogique
+    <color:#FFEBEE>█</color> Traçabilité
+
+    <b>Relations:</b>
+    *── Composition (contient)
+    o── Agrégation (utilise)
+    ── Association simple
+    <|── Héritage
+
+    <b>Directions:</b>
+    ▲ Vers le haut
+    ▼ Vers le bas
+    ◀ Vers la gauche
+    ▶ Vers la droite
+
+    <b>Cardinalités:</b>
+    1 = Exactement un
+    0..1 = Zéro ou un
+    0..* = Zéro ou plusieurs
+endlegend
+
+@enduml

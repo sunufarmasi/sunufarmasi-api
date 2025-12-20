@@ -1,0 +1,835 @@
+@startuml SunuFarmasi - Modélisation Complète
+
+!theme plain
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageFontSize 14
+
+title SunuFarmasi - Diagramme de Classes Complet\n<size:12>Système de Gestion de Pharmacie - Sénégal</size>
+
+' ═══════════════════════════════════════════════════════════
+' LOCALISATION
+' ═══════════════════════════════════════════════════════════
+
+package "Localisation" #LightBlue {
+    class Region {
+        +UUID id
+        +String code
+        +String nom
+    }
+    
+    class Departement {
+        +UUID id
+        +String code
+        +String nom
+        +Region region
+    }
+    
+    class Commune {
+        +UUID id
+        +String code
+        +String nom
+        +Departement departement
+    }
+    
+    Region "1" --> "*" Departement
+    Departement "1" --> "*" Commune
+}
+
+' ═══════════════════════════════════════════════════════════
+' AUTHENTIFICATION (avec héritage)
+' ═══════════════════════════════════════════════════════════
+
+package "Authentification" #LightGreen {
+    abstract class User {
+        +UUID id
+        +String email
+        +String password
+        +String prenom
+        +String nom
+        +String telephone
+        +String photoUrl
+        +Role role
+        +Boolean estActif
+        +Boolean emailVerifie
+        +LocalDateTime derniereConnexion
+        --
+        +getNomComplet()
+        +getUserType()
+    }
+    
+    class Pharmacien extends User {
+        +String numeroOrdre
+        +LocalDate dateInscriptionOrdre
+        +SpecialitePharmacie specialite
+        +String diplome
+        +String universite
+        +Boolean estTitulaire
+        +Pharmacie pharmaciePrincipale
+        +List<Pharmacie> pharmacies
+        +Boolean cotisationOrdreJour
+    }
+    
+    class Patient extends User {
+        +String numeroFiche
+        +LocalDate dateNaissance
+        +Sexe sexe
+        +String numeroCni
+        +String adresse
+        +Commune commune
+        +GroupeSanguin groupeSanguin
+        +String allergies
+        +String antecedents
+        +String contactUrgenceNom
+        +String medecinTraitant
+    }
+    
+    class MembreSyndicat extends User {
+        +Syndicat syndicat
+        +FonctionSyndicat fonction
+        +LocalDate datePriseFonction
+        +LocalDate dateFinMandat
+        +String numeroOrdre
+        +Boolean peutGererGardes
+        +Boolean peutValiderAdhesions
+    }
+    
+    enum Role {
+        SUPER_ADMIN
+        ADMIN_SYNDICAT
+        PHARMACIEN_TITULAIRE
+        PHARMACIEN_ASSISTANT
+        PREPARATEUR
+        VENDEUR
+        COMPTABLE
+        PRESIDENT_SYNDICAT
+        SECRETAIRE_SYNDICAT
+        MEMBRE_BUREAU
+        PATIENT
+    }
+    
+    enum SpecialitePharmacie {
+        OFFICINE
+        HOSPITALIER
+        INDUSTRIEL
+        BIOLOGIE
+        GROSSISTE
+    }
+    
+    enum FonctionSyndicat {
+        PRESIDENT
+        VICE_PRESIDENT
+        SECRETAIRE_GENERAL
+        TRESORIER
+        RESPONSABLE_GARDES
+    }
+    
+    enum Sexe {
+        MASCULIN
+        FEMININ
+    }
+    
+    enum GroupeSanguin {
+        A_POSITIF
+        A_NEGATIF
+        B_POSITIF
+        B_NEGATIF
+        AB_POSITIF
+        AB_NEGATIF
+        O_POSITIF
+        O_NEGATIF
+    }
+    
+    User --> Role
+    Pharmacien --> SpecialitePharmacie
+    Patient --> Sexe
+    Patient --> GroupeSanguin
+    MembreSyndicat --> FonctionSyndicat
+}
+
+' ═══════════════════════════════════════════════════════════
+' PHARMACIE
+' ═══════════════════════════════════════════════════════════
+
+package "Pharmacie" #LightYellow {
+    class Pharmacie {
+        +UUID id
+        +String code
+        +String nom
+        +String adresse
+        +String telephone
+        +String email
+        +String ninea
+        +String registreCommerce
+        +Commune commune
+        +User pharmacienTitulaire
+        +Boolean estActif
+    }
+    
+    Pharmacie --> Commune
+    Pharmacie --> User
+}
+
+' ═══════════════════════════════════════════════════════════
+' PRODUITS & STOCK
+' ═══════════════════════════════════════════════════════════
+
+package "Produits & Stock" #Pink {
+    class Produit {
+        +UUID id
+        +String code
+        +String codeBarre
+        +String nom
+        +String dci
+        +String dosage
+        +CategorieProduit categorie
+        +FormeGalenique forme
+        +Boolean ordonnanceRequise
+        +Boolean estActif
+    }
+    
+    class ProduitPharmacie {
+        +UUID id
+        +Pharmacie pharmacie
+        +Produit produit
+        +Integer quantiteStock
+        +Integer seuilAlerte
+        +Integer stockOptimal
+        +BigDecimal prixAchatHT
+        +BigDecimal prixVenteTTC
+        +BigDecimal tauxTVA
+        +LocalDate datePeremptionProche
+        +StatutProduit statut
+        +Boolean estActif
+    }
+    
+    class MouvementStock {
+        +UUID id
+        +ProduitPharmacie produitPharmacie
+        +TypeMouvement type
+        +Integer quantite
+        +Integer quantiteAvant
+        +Integer quantiteApres
+        +String numeroLot
+        +LocalDate datePeremption
+        +String motif
+        +String referenceExterne
+        +UUID effectueParId
+        +LocalDateTime dateHeure
+    }
+    
+    enum CategorieProduit {
+        MEDICAMENT
+        GENERIQUE
+        PARAPHARMACIE
+        COSMETIQUE
+        DISPOSITIF_MEDICAL
+        COMPLEMENT_ALIMENTAIRE
+    }
+    
+    enum FormeGalenique {
+        COMPRIME
+        GELULE
+        SIROP
+        INJECTABLE
+        POMMADE
+        SUPPOSITOIRE
+        COLLYRE
+        SACHET
+    }
+    
+    enum TypeMouvement {
+        ENTREE
+        SORTIE
+        VENTE
+        ACHAT
+        AJUSTEMENT_POSITIF
+        AJUSTEMENT_NEGATIF
+        PEREMPTION
+        CASSE
+        TRANSFERT
+        RETOUR
+    }
+    
+    enum StatutProduit {
+        ACTIF
+        INACTIF
+        RUPTURE
+        EN_COMMANDE
+    }
+    
+    Produit --> CategorieProduit
+    Produit --> FormeGalenique
+    ProduitPharmacie --> Pharmacie
+    ProduitPharmacie --> Produit
+    ProduitPharmacie --> StatutProduit
+    MouvementStock --> ProduitPharmacie
+    MouvementStock --> TypeMouvement
+}
+
+' ═══════════════════════════════════════════════════════════
+' VENTES
+' ═══════════════════════════════════════════════════════════
+
+package "Ventes" #LightCoral {
+    class Vente {
+        +UUID id
+        +String numero
+        +Pharmacie pharmacie
+        +Patient patient
+        +TypeVente type
+        +StatutVente statut
+        +ModePaiement modePaiement
+        +BigDecimal montantBrutTTC
+        +BigDecimal montantRemise
+        +BigDecimal montantNetTTC
+        +BigDecimal montantMutuelle
+        +BigDecimal montantPaye
+        +UUID vendeurId
+        +LocalDateTime dateVente
+        +List<LigneVente> lignes
+    }
+    
+    class LigneVente {
+        +UUID id
+        +Vente vente
+        +Produit produit
+        +String produitNom
+        +Integer quantite
+        +BigDecimal prixUnitaireTTC
+        +BigDecimal remisePourcent
+        +BigDecimal montantTTC
+        +String numeroLot
+    }
+    
+    enum TypeVente {
+        COMPTOIR
+        ORDONNANCE
+        MUTUELLE
+        LIVRAISON
+    }
+    
+    enum StatutVente {
+        EN_COURS
+        VALIDEE
+        ANNULEE
+        REMBOURSEE
+    }
+    
+    enum ModePaiement {
+        ESPECES
+        CARTE_BANCAIRE
+        CHEQUE
+        VIREMENT
+        ORANGE_MONEY
+        WAVE
+        FREE_MONEY
+        E_MONEY
+        CREDIT
+        MIXTE
+    }
+    
+    Vente --> Pharmacie
+    Vente --> TypeVente
+    Vente --> StatutVente
+    Vente --> ModePaiement
+    Vente "1" --> "*" LigneVente
+    LigneVente --> Produit
+}
+
+' ═══════════════════════════════════════════════════════════
+' COMMANDES FOURNISSEURS
+' ═══════════════════════════════════════════════════════════
+
+package "Commandes" #Wheat {
+    class Fournisseur {
+        +UUID id
+        +String code
+        +String nom
+        +TypeFournisseur type
+        +String adresse
+        +String telephone
+        +String email
+        +BigDecimal delaiLivraisonJours
+        +BigDecimal minimumCommande
+        +BigDecimal remiseGenerale
+        +Boolean estActif
+    }
+    
+    class Commande {
+        +UUID id
+        +String numero
+        +Pharmacie pharmacie
+        +Fournisseur fournisseur
+        +StatutCommande statut
+        +LocalDateTime dateCommande
+        +LocalDate dateLivraisonPrevue
+        +BigDecimal montantHT
+        +BigDecimal montantTTC
+        +BigDecimal remiseGlobale
+        +BigDecimal fraisPort
+        +Boolean estUrgente
+        +List<LigneCommande> lignes
+    }
+    
+    class LigneCommande {
+        +UUID id
+        +Commande commande
+        +Produit produit
+        +Integer quantiteCommandee
+        +Integer quantiteConfirmee
+        +Integer quantiteRecue
+        +BigDecimal prixUnitaireHT
+        +BigDecimal remisePourcent
+        +String numeroLot
+        +LocalDate datePeremption
+    }
+    
+    enum TypeFournisseur {
+        GROSSISTE
+        LABORATOIRE
+        IMPORTATEUR
+        COOPERATIVE
+    }
+    
+    enum StatutCommande {
+        BROUILLON
+        EN_ATTENTE
+        CONFIRMEE
+        EN_PREPARATION
+        EXPEDIEE
+        LIVREE_PARTIELLE
+        LIVREE
+        ANNULEE
+        REFUSEE
+    }
+    
+    Fournisseur --> TypeFournisseur
+    Commande --> Pharmacie
+    Commande --> Fournisseur
+    Commande --> StatutCommande
+    Commande "1" --> "*" LigneCommande
+    LigneCommande --> Produit
+}
+
+' ═══════════════════════════════════════════════════════════
+' MUTUELLES & TIERS PAYANT
+' ═══════════════════════════════════════════════════════════
+
+package "Mutuelles" #Lavender {
+    class Mutuelle {
+        +UUID id
+        +String code
+        +String nom
+        +TypeMutuelle type
+        +TypeCouverture typeCouverture
+        +BigDecimal tauxCouvertureDefaut
+        +BigDecimal plafondAnnuel
+        +BigDecimal franchise
+        +Integer delaiPaiementJours
+        +Boolean exigeOrdonnance
+        +Boolean estActif
+    }
+    
+    class ContratMutuelle {
+        +UUID id
+        +Pharmacie pharmacie
+        +Mutuelle mutuelle
+        +String numeroContrat
+        +LocalDate dateDebut
+        +LocalDate dateFin
+        +BigDecimal tauxCouverture
+        +Boolean tiersPayantAutorise
+        +Boolean estActif
+    }
+    
+    class Adherent {
+        +UUID id
+        +Mutuelle mutuelle
+        +String numeroAdherent
+        +String numeroCarte
+        +String nom
+        +String prenom
+        +String typeBeneficiaire
+        +BigDecimal tauxCouverture
+        +BigDecimal plafondAnnuel
+        +BigDecimal consommationAnnuelle
+        +LocalDate dateFinDroits
+        +Boolean estActif
+    }
+    
+    class DemandeRemboursement {
+        +UUID id
+        +String numero
+        +Pharmacie pharmacie
+        +Mutuelle mutuelle
+        +Adherent adherent
+        +Vente vente
+        +StatutDemande statut
+        +BigDecimal montantVente
+        +BigDecimal montantDemande
+        +BigDecimal tauxApplique
+        +BigDecimal montantAccepte
+        +BigDecimal montantPaye
+        +String numeroOrdonnance
+        +LocalDateTime dateDemande
+        +LocalDate datePaiement
+    }
+    
+    enum TypeMutuelle {
+        MUTUELLE_SANTE
+        IPM
+        ASSURANCE
+        CMU
+        ENTREPRISE
+        ONG
+        ETAT
+    }
+    
+    enum TypeCouverture {
+        TOTALE
+        PARTIELLE_80
+        PARTIELLE_70
+        PARTIELLE_60
+        PARTIELLE_50
+        FORFAITAIRE
+        PLAFONNEE
+    }
+    
+    enum StatutDemande {
+        BROUILLON
+        SOUMISE
+        EN_TRAITEMENT
+        ACCEPTEE
+        PARTIELLEMENT_ACCEPTEE
+        PAYEE
+        REJETEE
+        ANNULEE
+    }
+    
+    Mutuelle --> TypeMutuelle
+    Mutuelle --> TypeCouverture
+    ContratMutuelle --> Pharmacie
+    ContratMutuelle --> Mutuelle
+    Adherent --> Mutuelle
+    DemandeRemboursement --> Pharmacie
+    DemandeRemboursement --> Mutuelle
+    DemandeRemboursement --> Adherent
+    DemandeRemboursement --> Vente
+    DemandeRemboursement --> StatutDemande
+}
+
+' ═══════════════════════════════════════════════════════════
+' EMPLOYÉS
+' ═══════════════════════════════════════════════════════════
+
+package "Employés" #LightGray {
+    class Employe {
+        +UUID id
+        +String matricule
+        +String nom
+        +String prenom
+        +String telephone
+        +String email
+        +String poste
+        +LocalDate dateEmbauche
+        +Pharmacie pharmacie
+        +User user
+        +Boolean estActif
+    }
+    
+    Employe --> Pharmacie
+    Employe --> User
+}
+
+' ═══════════════════════════════════════════════════════════
+' GARDES (basé sur Pharmacies)
+' ═══════════════════════════════════════════════════════════
+
+package "Gardes" #Khaki {
+    class PlanningGarde {
+        +UUID id
+        +Syndicat syndicat
+        +String titre
+        +String description
+        +LocalDate dateDebut
+        +LocalDate dateFin
+        +StatutPlanning statut
+        +LocalDateTime datePublicationPrevue
+        +LocalDateTime datePublication
+        +Boolean publicationAuto
+        +Boolean notifierPharmacies
+        +Boolean notifierSms
+        +Boolean notifierEmail
+        +UUID creeParId
+        +UUID publieParId
+        +List<Garde> gardes
+    }
+    
+    class Garde {
+        +UUID id
+        +PlanningGarde planning
+        +Pharmacie pharmacie
+        +LocalDate dateGarde
+        +TypeGarde typeGarde
+        +StatutGarde statut
+        +LocalTime heureDebut
+        +LocalTime heureFin
+        +String notes
+        +Boolean confirmeParPharmacie
+        +LocalDateTime dateConfirmation
+        +Boolean notificationEnvoyee
+        +Boolean rappelEnvoye
+        +Double latitude
+        +Double longitude
+        +String zone
+    }
+    
+    enum TypeGarde {
+        JOUR
+        NUIT
+        JOUR_24H
+        JOUR_FERIE
+        WEEKEND
+    }
+    
+    enum StatutGarde {
+        PLANIFIEE
+        CONFIRMEE
+        EN_COURS
+        TERMINEE
+        ANNULEE
+        REPORTEE
+    }
+    
+    enum StatutPlanning {
+        BROUILLON
+        EN_VALIDATION
+        VALIDE
+        PUBLIE
+        ARCHIVE
+    }
+    
+    PlanningGarde --> Syndicat
+    PlanningGarde --> StatutPlanning
+    PlanningGarde "1" --> "*" Garde
+    Garde --> PlanningGarde
+    Garde --> Pharmacie
+    Garde --> TypeGarde
+    Garde --> StatutGarde
+}
+
+' Note: Patient est dans le package Authentification (hérite de User)
+' La classe Patient hérite de User et ajoute les infos médicales
+
+' ═══════════════════════════════════════════════════════════
+' NOTIFICATIONS
+' ═══════════════════════════════════════════════════════════
+
+package "Notifications" #MistyRose {
+    class Notification {
+        +UUID id
+        +UUID destinataireId
+        +UUID pharmacieId
+        +TypeNotification type
+        +CanalNotification canal
+        +StatutNotification statut
+        +String titre
+        +String message
+        +String lienAction
+        +Boolean estLu
+        +LocalDateTime dateCreation
+        +LocalDateTime dateEnvoi
+    }
+    
+    class ConfigNotification {
+        +UUID id
+        +UUID userId
+        +Boolean appActive
+        +Boolean emailActive
+        +Boolean smsActive
+        +Boolean pushActive
+        +Boolean notifStock
+        +Boolean notifCommande
+        +Boolean notifMutuelle
+        +Boolean notifGarde
+        +LocalTime heureDebutSilence
+        +LocalTime heureFinSilence
+    }
+    
+    enum TypeNotification {
+        RUPTURE_STOCK
+        STOCK_FAIBLE
+        PEREMPTION_PROCHE
+        COMMANDE_RECUE
+        COMMANDE_LIVREE
+        DEMANDE_ACCEPTEE
+        PAIEMENT_RECU
+        RAPPEL_GARDE
+        GARDE_DEMAIN
+    }
+    
+    enum CanalNotification {
+        APP
+        EMAIL
+        SMS
+        WHATSAPP
+        PUSH
+    }
+    
+    enum StatutNotification {
+        EN_ATTENTE
+        ENVOYEE
+        LIVREE
+        LUE
+        ECHOUEE
+    }
+    
+    Notification --> TypeNotification
+    Notification --> CanalNotification
+    Notification --> StatutNotification
+    ConfigNotification --> User
+}
+
+' ═══════════════════════════════════════════════════════════
+' SYNDICAT
+' ═══════════════════════════════════════════════════════════
+
+package "Syndicat" #Thistle {
+    class Syndicat {
+        +UUID id
+        +String code
+        +String nom
+        +String adresse
+        +String telephone
+        +Region region
+    }
+    
+    class AdhesionSyndicat {
+        +UUID id
+        +Syndicat syndicat
+        +Pharmacie pharmacie
+        +LocalDate dateAdhesion
+        +BigDecimal cotisationAnnuelle
+        +Boolean estActif
+    }
+    
+    Syndicat --> Region
+    AdhesionSyndicat --> Syndicat
+    AdhesionSyndicat --> Pharmacie
+}
+
+' ═══════════════════════════════════════════════════════════
+' ABONNEMENTS & PAIEMENTS
+' ═══════════════════════════════════════════════════════════
+
+package "Abonnements & Paiements" #PaleGreen {
+    class SubscriptionPlan {
+        +UUID id
+        +String code
+        +String nom
+        +String description
+        +Integer prix
+        +Integer dureeJours
+        +PlanType type
+        +Integer maxConsultations
+        +Integer remiseMedicaments
+        +Boolean livraisonGratuite
+        +Boolean estActif
+    }
+    
+    class Subscription {
+        +UUID id
+        +Patient patient
+        +SubscriptionPlan plan
+        +SubscriptionStatus status
+        +LocalDate startDate
+        +LocalDate endDate
+        +Boolean autoRenew
+        +Integer montantPaye
+    }
+    
+    class Payment {
+        +UUID id
+        +Patient patient
+        +Subscription subscription
+        +Integer montant
+        +PaymentMethod methode
+        +PaymentStatus status
+        +String telephonePaiement
+        +String referenceExterne
+        +String referenceInterne
+        +String errorMessage
+        +LocalDateTime paidAt
+    }
+    
+    enum PlanType {
+        GRATUIT
+        BASIC
+        STANDARD
+        PREMIUM
+        FAMILLE
+        ENTREPRISE
+    }
+    
+    enum SubscriptionStatus {
+        PENDING
+        ACTIVE
+        EXPIRED
+        CANCELLED
+        SUSPENDED
+    }
+    
+    enum PaymentMethod {
+        ORANGE_MONEY
+        WAVE
+        FREE_MONEY
+        E_MONEY
+        CARTE_BANCAIRE
+        ESPECES
+        VIREMENT
+    }
+    
+    enum PaymentStatus {
+        PENDING
+        SUCCESS
+        FAILED
+        CANCELLED
+        REFUNDED
+        EXPIRED
+    }
+    
+    SubscriptionPlan --> PlanType
+    Subscription --> Patient
+    Subscription --> SubscriptionPlan
+    Subscription --> SubscriptionStatus
+    Payment --> Patient
+    Payment --> Subscription
+    Payment --> PaymentMethod
+    Payment --> PaymentStatus
+}
+
+' ═══════════════════════════════════════════════════════════
+' LÉGENDE
+' ═══════════════════════════════════════════════════════════
+
+legend right
+    |= Couleur |= Module |
+    | <#LightBlue> | Localisation |
+    | <#LightGreen> | Auth & Héritage Users |
+    | <#LightYellow> | Pharmacie |
+    | <#Pink> | Produits & Stock |
+    | <#LightCoral> | Ventes |
+    | <#Wheat> | Commandes |
+    | <#Lavender> | Mutuelles |
+    | <#LightGray> | Employés |
+    | <#Khaki> | Gardes (Syndicat→Pharmacie) |
+    | <#MistyRose> | Notifications |
+    | <#Thistle> | Syndicat |
+    | <#PaleGreen> | Abonnements & Paiements |
+endlegend
+
+footer SunuFarmasi v1.0.0 - © 2024 WeCan - Dakar, Sénégal
+
+@enduml
