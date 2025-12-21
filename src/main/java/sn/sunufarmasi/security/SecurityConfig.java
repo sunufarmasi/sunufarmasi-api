@@ -369,7 +369,7 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "http://localhost:8100",
                 "https://sunufarmasi.sn",
-                "https://app.sunufarmasi.sn"
+                "https://sunufarmasi-api.onrender.com"
         ));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
