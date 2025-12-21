@@ -11,5 +11,5 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-CMD ["java", "-Xmx400m", "-jar", "app.jar"]
+EXPOSE 10000
+CMD ["java", "-Xmx300m", "-Xms150m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=100m", "-jar", "app.jar"]
