@@ -201,8 +201,22 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
     /**
      * Trouver les gardes pour une date spécifique dans une RÉGION (toutes les localités)
      */
-    @Query("SELECT g FROM Garde g WHERE " +
-            "(g.departement.region.id = :regionId OR g.commune.departement.region.id = :regionId) " +
+//     @Query("SELECT g FROM Garde g WHERE " +
+//             "(g.departement.region.id = :regionId OR g.commune.departement.region.id = :regionId) " +
+//             "AND :date BETWEEN g.dateDebut AND g.dateFin " +
+//             "AND g.statut NOT IN ('ANNULEE')")
+//     List<Garde> findByDateAndRegion(
+//             @Param("date") LocalDate date,
+//             @Param("regionId") UUID regionId
+//     );
+
+@Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.departement dept " +
+            "LEFT JOIN dept.region r1 " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN c.departement cd " +
+            "LEFT JOIN cd.region r2 " +
+            "WHERE (r1.id = :regionId OR r2.id = :regionId) " +
             "AND :date BETWEEN g.dateDebut AND g.dateFin " +
             "AND g.statut NOT IN ('ANNULEE')")
     List<Garde> findByDateAndRegion(
