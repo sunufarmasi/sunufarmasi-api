@@ -74,10 +74,18 @@ public class PharmacieMapper {
                 pharmacie.getAccepteCommandes(),
                 pharmacie.getProposeLivraison(),
                 pharmacie.getRayonLivraisonKm(),
+                pharmacie.getHoraires(),
+                pharmacie.getDescription(),
+                pharmacie.getServices(),
 
                 // Images
                 pharmacie.getLogoUrl(),
                 pharmacie.getPhotoFacadeUrl(),
+
+                // Abonnement
+                pharmacie.getDateDernierPaiement(),
+                pharmacie.getDateFinAbonnement(),
+                pharmacie.getReferencePaiement(),
 
                 // Métadonnées
                 pharmacie.getCreatedAt(),

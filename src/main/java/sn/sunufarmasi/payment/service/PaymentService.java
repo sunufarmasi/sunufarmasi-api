@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.sunufarmasi.patient.entity.Patient;
+import sn.sunufarmasi.patient.repository.PatientRepository;
 import sn.sunufarmasi.payment.dto.request.InitiatePaymentRequest;
 import sn.sunufarmasi.payment.dto.response.PaymentResponse;
 import sn.sunufarmasi.payment.entity.Payment;
@@ -16,6 +17,7 @@ import sn.sunufarmasi.subscription.entity.Subscription;
 import sn.sunufarmasi.subscription.entity.SubscriptionPlan;
 import sn.sunufarmasi.subscription.service.SubscriptionService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +37,8 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final SubscriptionService subscriptionService;
+    private final WaveService waveService;
+    private final PatientRepository patientRepository;
 
     // ═══════════════════════════════════════════════════════════
     // INITIATION PAIEMENT
@@ -55,41 +59,44 @@ public class PaymentService {
             throw new BadRequestException("Impossible de payer pour l'essai gratuit");
         }
 
-        // Créer le paiement
+        // Créer le paiement en PENDING
+        String ref = Payment.generateReferenceInterne();
         Payment payment = Payment.builder()
                 .patient(patient)
                 .montant(plan.getPrix())
                 .methode(request.methode())
                 .status(PaymentStatus.PENDING)
                 .telephonePaiement(request.telephonePaiement())
-                .referenceInterne(Payment.generateReferenceInterne())
+                .referenceInterne(ref)
+                .planId(plan.getId().toString())
                 .build();
 
+        // Pour Wave : créer la session checkout
+        if (request.methode() == sn.sunufarmasi.payment.entity.PaymentMethod.WAVE) {
+            WaveService.WaveCheckoutSession session =
+                    waveService.createCheckoutSession(plan.getPrix(), ref);
+            payment.setWaveCheckoutId(session.id());
+            payment.setWaveCheckoutUrl(session.waveCheckoutUrl());
+            log.info("🌊 Session Wave créée: {} → {}", session.id(), session.waveCheckoutUrl());
+        }
+
         payment = paymentRepository.save(payment);
+        log.info("📝 Paiement créé: {} - {} FCFA - {}",
+                payment.getReferenceInterne(), payment.getMontant(), payment.getMethode());
 
-        log.info("📝 Paiement créé: {} - Montant: {} FCFA",
-                payment.getReferenceInterne(), payment.getMontant());
-
-        // Mock: Appel API Orange Money/Wave
-        boolean paymentSuccess = mockPaymentProvider(payment);
-
-        if (paymentSuccess) {
-            // Marquer comme réussi
-            String refExterne = "OM-" + System.currentTimeMillis();
-            payment.markAsSuccess(refExterne);
+        // Pour les méthodes non-Wave (futur) : mock
+        if (request.methode() != sn.sunufarmasi.payment.entity.PaymentMethod.WAVE) {
+            boolean success = mockPaymentProvider(payment);
+            if (success) {
+                payment.markAsSuccess("MOCK-" + System.currentTimeMillis());
+                Subscription subscription = subscriptionService.createSubscription(patient, plan);
+                payment.setSubscription(subscription);
+                log.info("✅ Paiement mock réussi - Abonnement: {}", subscription.getId());
+            } else {
+                payment.markAsFailed("Échec simulé");
+                log.warn("❌ Paiement mock échoué: {}", payment.getReferenceInterne());
+            }
             payment = paymentRepository.save(payment);
-
-            // Créer l'abonnement
-            Subscription subscription = subscriptionService.createSubscription(patient, plan);
-            payment.setSubscription(subscription);
-            payment = paymentRepository.save(payment);
-
-            log.info("✅ Paiement réussi - Abonnement créé: {}", subscription.getId());
-        } else {
-            payment.markAsFailed("Échec du paiement mobile");
-            payment = paymentRepository.save(payment);
-
-            log.error("❌ Paiement échoué: {}", payment.getReferenceInterne());
         }
 
         return mapToPaymentResponse(payment);
@@ -126,6 +133,60 @@ public class PaymentService {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // WEBHOOK WAVE
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Traiter un paiement Wave réussi (appelé par WaveWebhookController)
+     *
+     * @param referenceInterne  Notre référence (client_reference Wave)
+     * @param waveTransactionId ID de transaction Wave
+     */
+    @Transactional
+    public void handleWaveSuccess(String referenceInterne, String waveTransactionId) {
+        log.info("✅ Wave succès: ref={} waveId={}", referenceInterne, waveTransactionId);
+
+        Payment payment = paymentRepository.findByReferenceInterne(referenceInterne)
+                .orElseThrow(() -> new ResourceNotFoundException("Paiement non trouvé: " + referenceInterne));
+
+        if (payment.isSuccess()) {
+            log.info("⚠️ Paiement déjà traité: {}", referenceInterne);
+            return;
+        }
+
+        payment.markAsSuccess(waveTransactionId);
+
+        if (payment.getSubscription() == null && payment.getPlanId() != null) {
+            SubscriptionPlan plan = subscriptionService.getPlanById(payment.getPlanId());
+            Subscription subscription = subscriptionService.createSubscription(payment.getPatient(), plan);
+            payment.setSubscription(subscription);
+            log.info("🎉 Abonnement activé: patient={} plan={}",
+                    payment.getPatient().getId(), plan.getCode());
+        }
+
+        paymentRepository.save(payment);
+    }
+
+    /**
+     * Traiter un paiement Wave échoué
+     */
+    @Transactional
+    public void handleWaveFailure(String referenceInterne, String reason) {
+        log.warn("❌ Wave échec: ref={} raison={}", referenceInterne, reason);
+
+        Payment payment = paymentRepository.findByReferenceInterne(referenceInterne)
+                .orElseThrow(() -> new ResourceNotFoundException("Paiement non trouvé: " + referenceInterne));
+
+        if (!payment.isPending()) {
+            log.info("⚠️ Paiement déjà finalisé ({}): {}", payment.getStatus(), referenceInterne);
+            return;
+        }
+
+        payment.markAsFailed(reason);
+        paymentRepository.save(payment);
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // VÉRIFICATION PAIEMENT
     // ═══════════════════════════════════════════════════════════
 
@@ -150,6 +211,109 @@ public class PaymentService {
         List<Payment> payments = paymentRepository.findByPatientIdOrderByCreatedAtDesc(patientId);
 
         return payments.stream()
+                .map(this::mapToPaymentResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PAIEMENT MANUEL (Wave B2B sans API)
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Soumettre une demande de paiement manuel
+     * L'utilisateur a envoyé l'argent via Wave B2B et fournit sa référence de transaction
+     */
+    @Transactional
+    public PaymentResponse submitManualPayment(Patient patient, String planId, String waveReference) {
+        log.info("📝 Paiement manuel soumis: patient={} plan={} ref={}", patient.getId(), planId, waveReference);
+
+        SubscriptionPlan plan = subscriptionService.getPlanById(planId);
+
+        if ("FREE_TRIAL".equals(plan.getCode())) {
+            throw new BadRequestException("Impossible de payer pour l'essai gratuit");
+        }
+
+        String ref = Payment.generateReferenceInterne();
+        Payment payment = Payment.builder()
+                .patient(patient)
+                .montant(plan.getPrix())
+                .methode(sn.sunufarmasi.payment.entity.PaymentMethod.WAVE)
+                .status(PaymentStatus.PENDING_VALIDATION)
+                .referenceExterne(waveReference)
+                .referenceInterne(ref)
+                .planId(plan.getId().toString())
+                .build();
+
+        payment = paymentRepository.save(payment);
+        log.info("✅ Demande manuelle enregistrée: {} — en attente de validation admin", ref);
+
+        return mapToPaymentResponse(payment);
+    }
+
+    /**
+     * Valider un paiement manuel (admin uniquement)
+     * Active l'abonnement du patient
+     */
+    @Transactional
+    public PaymentResponse validateManualPayment(String referenceInterne) {
+        log.info("✅ Validation paiement manuel: {}", referenceInterne);
+
+        Payment payment = paymentRepository.findByReferenceInterne(referenceInterne)
+                .orElseThrow(() -> new ResourceNotFoundException("Paiement non trouvé: " + referenceInterne));
+
+        if (payment.getStatus() != PaymentStatus.PENDING_VALIDATION) {
+            throw new BadRequestException("Ce paiement ne peut pas être validé (statut: " + payment.getStatus() + ")");
+        }
+
+        payment.markAsSuccess(payment.getReferenceExterne());
+
+        SubscriptionPlan plan = subscriptionService.getPlanById(payment.getPlanId());
+        // upgradeToMonthly annule l'essai gratuit en cours si existant et crée l'abonnement payant
+        int mois = Math.max(1, plan.getDureeJours() / 30);
+        Subscription subscription = subscriptionService.upgradeToMonthly(payment.getPatient(), mois);
+        payment.setSubscription(subscription);
+
+        // Mettre à jour les champs premium du patient
+        Patient patient = payment.getPatient();
+        patient.setPremiumActif(true);
+        LocalDate fin = LocalDate.now().plusDays(plan.getDureeJours());
+        patient.setDateFinPremium(fin);
+        patient.setMontantPremium(plan.getPrix());
+        patient.setReferencePaiement(payment.getReferenceExterne());
+        patientRepository.save(patient);
+
+        paymentRepository.save(payment);
+        log.info("🎉 Paiement validé — abonnement activé: patient={} jusqu'au {}", payment.getPatient().getId(), fin);
+
+        return mapToPaymentResponse(payment);
+    }
+
+    /**
+     * Rejeter un paiement manuel (admin uniquement)
+     */
+    @Transactional
+    public PaymentResponse rejectManualPayment(String referenceInterne, String motif) {
+        log.warn("❌ Rejet paiement manuel: {} motif={}", referenceInterne, motif);
+
+        Payment payment = paymentRepository.findByReferenceInterne(referenceInterne)
+                .orElseThrow(() -> new ResourceNotFoundException("Paiement non trouvé: " + referenceInterne));
+
+        if (payment.getStatus() != PaymentStatus.PENDING_VALIDATION) {
+            throw new BadRequestException("Ce paiement ne peut pas être rejeté (statut: " + payment.getStatus() + ")");
+        }
+
+        payment.markAsFailed(motif != null ? motif : "Rejeté par l'administrateur");
+        paymentRepository.save(payment);
+
+        return mapToPaymentResponse(payment);
+    }
+
+    /**
+     * Lister les paiements en attente de validation
+     */
+    public List<PaymentResponse> getPendingValidation() {
+        return paymentRepository.findByStatusOrderByCreatedAtDesc(PaymentStatus.PENDING_VALIDATION)
+                .stream()
                 .map(this::mapToPaymentResponse)
                 .collect(Collectors.toList());
     }
@@ -195,6 +359,14 @@ public class PaymentService {
     // ═══════════════════════════════════════════════════════════
 
     private PaymentResponse mapToPaymentResponse(Payment payment) {
+        String patientNom = payment.getPatient() != null ? payment.getPatient().getNomComplet() : null;
+        String patientId  = payment.getPatient() != null ? payment.getPatient().getId().toString() : null;
+        String planCode   = null;
+        if (payment.getPlanId() != null) {
+            try {
+                planCode = subscriptionService.getPlanById(payment.getPlanId()).getCode();
+            } catch (Exception ignored) {}
+        }
         return new PaymentResponse(
                 payment.getId().toString(),
                 payment.getMontant(),
@@ -205,8 +377,12 @@ public class PaymentService {
                 payment.getReferenceExterne(),
                 payment.getTelephonePaiement(),
                 payment.getErrorMessage(),
+                payment.getWaveCheckoutUrl(),
                 payment.getPaidAt(),
-                payment.getCreatedAt()
+                payment.getCreatedAt(),
+                patientNom,
+                patientId,
+                planCode
         );
     }
 }

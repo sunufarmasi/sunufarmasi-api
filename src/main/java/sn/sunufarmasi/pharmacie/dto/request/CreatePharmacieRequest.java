@@ -43,7 +43,7 @@ public record CreatePharmacieRequest(
         Double longitude,
 
         @NotBlank(message = "Le téléphone est obligatoire")
-        @Pattern(regexp = "^\\+221[0-9]{9}$", message = "Format téléphone invalide (ex: +221338234567)")
+        @Pattern(regexp = "^(\\+221[0-9]{9}|[0-9]{2}[ ]?[0-9]{3}[ ]?[0-9]{2}[ ]?[0-9]{2}|[0-9]{9,})$", message = "Format téléphone invalide")
         String telephone,
 
         String telephoneSecondaire,

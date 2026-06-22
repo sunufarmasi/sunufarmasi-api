@@ -143,7 +143,10 @@ public class Subscription {
         if (isExpired()) {
             return 0;
         }
-        return java.time.Duration.between(LocalDateTime.now(), expiresAt).toDays();
+        return java.time.temporal.ChronoUnit.DAYS.between(
+                LocalDateTime.now().toLocalDate(),
+                expiresAt.toLocalDate()
+        );
     }
 
     /**

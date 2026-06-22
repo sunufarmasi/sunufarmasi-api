@@ -16,6 +16,8 @@ import sn.sunufarmasi.shared.exception.ConflictException;
 import sn.sunufarmasi.shared.exception.ResourceNotFoundException;
 import sn.sunufarmasi.subscription.service.SubscriptionService;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -88,7 +90,13 @@ public class PatientService {
         // Activer l'essai gratuit automatiquement
         subscriptionService.activateFreeTrial(patient);
 
-        log.info("🎁 Essai gratuit 15 jours activé pour patient: {}", patient.getId());
+        // Mettre à jour les champs premium du patient pour refléter l'essai
+        patient.setPremiumActif(true);
+        patient.setDateFinPremium(LocalDate.now().plusDays(15));
+        patient.setMontantPremium(0);
+        patient = patientRepository.save(patient);
+
+        log.info("🎁 Essai gratuit 15 jours activé pour patient: {} jusqu'au {}", patient.getId(), patient.getDateFinPremium());
 
         return patientMapper.toResponse(patient);
     }
@@ -218,5 +226,62 @@ public class PatientService {
      */
     public boolean telephoneExists(String telephone) {
         return patientRepository.existsByTelephone(telephone);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ADMIN - Liste et gestion premium
+    // ═══════════════════════════════════════════════════════════
+
+    public List<PatientResponse> getAll() {
+        return patientRepository.findAll().stream()
+                .map(patientMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public PatientResponse activerPremium(UUID patientId, int mois, String reference) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        patient.setPremiumActif(true);
+        LocalDate fin = patient.getDateFinPremium() != null && patient.getDateFinPremium().isAfter(LocalDate.now())
+                ? patient.getDateFinPremium().plusMonths(mois)
+                : LocalDate.now().plusMonths(mois);
+        patient.setDateFinPremium(fin);
+        patient.setMontantPremium(500);
+        if (reference != null && !reference.isBlank()) {
+            patient.setReferencePaiement(reference);
+        }
+        patientRepository.save(patient);
+
+        // Mettre à jour la subscription : passer de FREE_TRIAL à MONTHLY (isTrial=false)
+        subscriptionService.upgradeToMonthly(patient, mois);
+
+        return patientMapper.toResponse(patient);
+    }
+
+    @Transactional
+    public PatientResponse suspendrePremium(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        patient.setPremiumActif(false);
+        patientRepository.save(patient);
+        subscriptionService.suspendreSubscription(patient.getId());
+        return patientMapper.toResponse(patient);
+    }
+
+    @Transactional
+    public void suspendreCompte(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        patient.setActif(false);
+        patientRepository.save(patient);
+    }
+
+    @Transactional
+    public void reactiverCompte(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        patient.setActif(true);
+        patientRepository.save(patient);
     }
 }

@@ -54,10 +54,18 @@ public record PharmacieResponse(
         Boolean accepteCommandes,
         Boolean proposeLivraison,
         Integer rayonLivraisonKm,
+        String horaires,
+        String description,
+        String services,
 
         // Images
         String logoUrl,
         String photoFacadeUrl,
+
+        // Abonnement
+        LocalDateTime dateDernierPaiement,
+        LocalDateTime dateFinAbonnement,
+        String referencePaiement,
 
         // Métadonnées
         LocalDateTime createdAt,

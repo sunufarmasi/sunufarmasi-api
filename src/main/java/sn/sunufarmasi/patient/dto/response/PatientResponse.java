@@ -30,6 +30,13 @@ public record PatientResponse(
         boolean emailVerified,
         boolean telephoneVerified,
         boolean actif,
+        boolean premiumActif,
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate dateFinPremium,
+
+        Integer montantPremium,
+        String referencePaiement,
 
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime lastLoginAt,
@@ -43,6 +50,7 @@ public record PatientResponse(
     public record CommuneSimpleDto(
             String id,
             String nom,
+            String departement,
             String region,
             CoordinatesDto coordinates
     ) {
@@ -53,7 +61,7 @@ public record PatientResponse(
     }
 
     /**
-     * Constructeur simplifié sans commune
+     * Constructeur simplifié sans commune ni premium
      */
     public PatientResponse(
             String id, String email, String telephone, String nomComplet,
@@ -62,6 +70,6 @@ public record PatientResponse(
             LocalDateTime lastLoginAt, LocalDateTime createdAt
     ) {
         this(id, email, telephone, nomComplet, dateNaissance, sexe, adresse, photoUrl,
-                null, emailVerified, telephoneVerified, actif, lastLoginAt, createdAt);
+                null, emailVerified, telephoneVerified, actif, false, null, 0, null, lastLoginAt, createdAt);
     }
 }

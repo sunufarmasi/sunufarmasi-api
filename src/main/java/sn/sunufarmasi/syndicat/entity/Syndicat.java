@@ -16,6 +16,8 @@ import sn.sunufarmasi.syndicat.enums.TypeSyndicat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -97,6 +99,18 @@ public class Syndicat {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departement_id")
     private Departement departement;
+
+    /**
+     * Si type = ZONE : les communes spécifiques gérées (plusieurs communes d'un même département)
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "syndicat_communes_zone",
+        joinColumns = @JoinColumn(name = "syndicat_id"),
+        inverseJoinColumns = @JoinColumn(name = "commune_id")
+    )
+    @Builder.Default
+    private Set<Commune> communesZone = new HashSet<>();
 
     /**
      * Région de référence (déduite de commune ou département)
@@ -285,7 +299,7 @@ public class Syndicat {
     }
 
     /**
-     * Retourne le nom de la zone gérée (commune ou département)
+     * Retourne le nom de la zone gérée (commune, département ou région)
      */
     public String getNomZone() {
         if (this.type == TypeSyndicat.COMMUNE && this.commune != null) {
@@ -293,6 +307,9 @@ public class Syndicat {
         }
         if (this.type == TypeSyndicat.DEPARTEMENT && this.departement != null) {
             return this.departement.getNom();
+        }
+        if (this.type == TypeSyndicat.REGION && this.region != null) {
+            return this.region.getNom();
         }
         return null;
     }
@@ -325,6 +342,8 @@ public class Syndicat {
             // Déterminer le plan selon le type
             if (this.type == TypeSyndicat.DEPARTEMENT) {
                 this.plan = PlanAbonnementSyndicat.DEPARTEMENT;
+            } else if (this.type == TypeSyndicat.REGION) {
+                this.plan = PlanAbonnementSyndicat.REGION;
             } else {
                 this.plan = PlanAbonnementSyndicat.COMMUNE;
             }

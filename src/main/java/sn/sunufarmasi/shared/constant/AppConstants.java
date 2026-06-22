@@ -178,6 +178,6 @@ public final class AppConstants {
     public static final String APP_NAME = "PharmaGo";
     public static final String APP_DESCRIPTION = "Plateforme de localisation et gestion de pharmacies au Sénégal";
     public static final String APP_VERSION_NUMBER = "1.0.0";
-    public static final String SUPPORT_EMAIL = "support@pharmago.sn";
-    public static final String SUPPORT_PHONE = "+221 33 890 12 34";
+    public static final String SUPPORT_EMAIL = "sunufarmasi@gmail.com";
+    public static final String SUPPORT_PHONE = "+221 77 479 24 57";
 }

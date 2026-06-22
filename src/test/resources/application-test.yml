@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  # Désactiver Redis pour les tests
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # Désactiver le cache Redis
+  cache:
+    type: none
+
+  # Désactiver l'envoi d'email
+  mail:
+    host: localhost
+    port: 25
+    test-connection: false
+
+# Désactiver Firebase pour les tests
+firebase:
+  service-account-path: ""
+
+# JWT secret pour les tests
+app:
+  jwt:
+    secret: test-secret-key-minimum-256-bits-for-hmac-sha256-algorithm-ok
+    expiration: 86400000
+  init:
+    enabled: false

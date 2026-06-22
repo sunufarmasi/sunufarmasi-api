@@ -85,6 +85,24 @@ public class Payment {
     private String referenceExterne;
 
     /**
+     * ID de la session Wave Checkout (cos_...)
+     */
+    @Column(name = "wave_checkout_id", length = 100)
+    private String waveCheckoutId;
+
+    /**
+     * URL de paiement Wave (wave_launch_url)
+     */
+    @Column(name = "wave_checkout_url", length = 500)
+    private String waveCheckoutUrl;
+
+    /**
+     * Identifiant du plan d'abonnement choisi
+     */
+    @Column(name = "plan_id", length = 100)
+    private String planId;
+
+    /**
      * Référence interne (notre système)
      */
     @Column(name = "reference_interne", nullable = false, unique = true, length = 50)

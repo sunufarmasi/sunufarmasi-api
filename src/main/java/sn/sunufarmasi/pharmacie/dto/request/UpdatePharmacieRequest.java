@@ -2,6 +2,8 @@ package sn.sunufarmasi.pharmacie.dto.request;
 
 import jakarta.validation.constraints.*;
 
+import java.util.UUID;
+
 /**
  * DTO Request pour modifier une pharmacie
  *
@@ -27,7 +29,7 @@ public record UpdatePharmacieRequest(
         @DecimalMax(value = "180.0", message = "La longitude doit être <= 180")
         Double longitude,
 
-        @Pattern(regexp = "^\\+221[0-9]{9}$", message = "Format téléphone invalide")
+        @Pattern(regexp = "^(\\+221[0-9]{9}|[0-9]{2}[ ]?[0-9]{3}[ ]?[0-9]{2}[ ]?[0-9]{2}|[0-9]{9,})$", message = "Format téléphone invalide")
         String telephone,
 
         String telephoneSecondaire,
@@ -45,6 +47,14 @@ public record UpdatePharmacieRequest(
 
         @Min(value = 1, message = "Le rayon de livraison doit être >= 1 km")
         @Max(value = 100, message = "Le rayon de livraison doit être <= 100 km")
-        Integer rayonLivraisonKm
+        Integer rayonLivraisonKm,
+
+        String description,
+
+        @Size(max = 500)
+        String services,
+
+        // Assigner un pharmacien propriétaire (admin seulement)
+        UUID pharmacienId
 
 ) {}

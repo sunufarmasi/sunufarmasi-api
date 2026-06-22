@@ -83,4 +83,16 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
      * Vérifier si un patient a déjà utilisé son essai gratuit
      */
     boolean existsByPatientIdAndIsTrialTrue(UUID patientId);
+
+    /**
+     * Charger tous les abonnements payants avec plan et patient en eager
+     * (évite LazyInitializationException hors session)
+     */
+    @Query("""
+        SELECT s FROM Subscription s
+        JOIN FETCH s.plan
+        JOIN FETCH s.patient
+        WHERE s.isTrial = false
+        """)
+    List<Subscription> findAllPaidWithPlanAndPatient();
 }

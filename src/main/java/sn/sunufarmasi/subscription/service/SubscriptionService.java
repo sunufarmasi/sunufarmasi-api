@@ -163,6 +163,50 @@ public class SubscriptionService {
     }
 
     /**
+     * Upgrade l'abonnement d'essai en premium (admin)
+     * Annule le FREE_TRIAL et crée un abonnement MONTHLY non-trial
+     */
+    @Transactional
+    public Subscription upgradeToMonthly(Patient patient, int mois) {
+        log.info("⭐ Upgrade premium {} mois pour patient: {}", mois, patient.getId());
+
+        // Annuler l'abonnement actif (trial ou autre)
+        Subscription oldSub = getActiveSubscription(patient.getId());
+        if (oldSub != null) {
+            oldSub.cancel("Upgrade vers premium par admin");
+            subscriptionRepository.save(oldSub);
+        }
+
+        SubscriptionPlan monthlyPlan = getPlanByCode("MONTHLY");
+
+        Subscription subscription = Subscription.builder()
+                .patient(patient)
+                .plan(monthlyPlan)
+                .status(SubscriptionStatus.ACTIVE)
+                .startsAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMonths(mois))
+                .isTrial(false)
+                .autoRenew(false)
+                .build();
+
+        subscription = subscriptionRepository.save(subscription);
+        log.info("✅ Premium activé jusqu'au: {}", subscription.getExpiresAt());
+        return subscription;
+    }
+
+    /**
+     * Suspendre le premium (admin)
+     */
+    @Transactional
+    public void suspendreSubscription(UUID patientId) {
+        Subscription sub = getActiveSubscription(patientId);
+        if (sub != null) {
+            sub.cancel("Suspension par admin");
+            subscriptionRepository.save(sub);
+        }
+    }
+
+    /**
      * Renouveler un abonnement
      */
     @Transactional

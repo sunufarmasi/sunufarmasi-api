@@ -103,4 +103,88 @@ public class PaymentController {
                 ApiResponse.success(payments)
         );
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // PAIEMENT MANUEL (Wave B2B sans API)
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * POST /api/v1/payments/manual
+     * Soumettre une demande de paiement manuel Wave
+     */
+    @PostMapping("/manual")
+    @Operation(summary = "Soumettre paiement manuel", description = "Soumettre une demande après paiement Wave B2B")
+    public ResponseEntity<ApiResponse<PaymentResponse>> submitManualPayment(
+            @RequestBody java.util.Map<String, String> body,
+            Authentication authentication
+    ) {
+        log.info("POST /api/v1/payments/manual - User: {}", authentication.getName());
+
+        UUID patientId = UUID.fromString(authentication.getName());
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+
+        String planId = body.get("planId");
+        String waveReference = body.get("waveReference");
+
+        PaymentResponse payment = paymentService.submitManualPayment(patient, planId, waveReference);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Demande de paiement soumise. En attente de validation.", payment)
+        );
+    }
+
+    /**
+     * GET /api/v1/payments/pending-validation
+     * Lister les paiements en attente de validation (ADMIN)
+     */
+    @GetMapping("/pending-validation")
+    @Operation(summary = "Paiements en attente", description = "Lister les paiements manuels en attente de validation")
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getPendingValidation() {
+        log.info("GET /api/v1/payments/pending-validation");
+
+        List<PaymentResponse> payments = paymentService.getPendingValidation();
+
+        return ResponseEntity.ok(
+                ApiResponse.success(payments)
+        );
+    }
+
+    /**
+     * PUT /api/v1/payments/{referenceInterne}/validate
+     * Valider un paiement manuel (ADMIN)
+     */
+    @PutMapping("/{referenceInterne}/validate")
+    @Operation(summary = "Valider paiement", description = "Valider un paiement manuel et activer l'abonnement")
+    public ResponseEntity<ApiResponse<PaymentResponse>> validatePayment(
+            @PathVariable String referenceInterne
+    ) {
+        log.info("PUT /api/v1/payments/{}/validate", referenceInterne);
+
+        PaymentResponse payment = paymentService.validateManualPayment(referenceInterne);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Paiement validé. Abonnement activé.", payment)
+        );
+    }
+
+    /**
+     * PUT /api/v1/payments/{referenceInterne}/reject
+     * Rejeter un paiement manuel (ADMIN)
+     */
+    @PutMapping("/{referenceInterne}/reject")
+    @Operation(summary = "Rejeter paiement", description = "Rejeter un paiement manuel")
+    public ResponseEntity<ApiResponse<PaymentResponse>> rejectPayment(
+            @PathVariable String referenceInterne,
+            @RequestBody(required = false) java.util.Map<String, String> body
+    ) {
+        log.info("PUT /api/v1/payments/{}/reject", referenceInterne);
+
+        String motif = body != null ? body.get("motif") : null;
+        PaymentResponse payment = paymentService.rejectManualPayment(referenceInterne, motif);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Paiement rejeté.", payment)
+        );
+    }
 }

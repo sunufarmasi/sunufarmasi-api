@@ -22,24 +22,44 @@ public enum PlanAbonnementSyndicat {
             "Essai gratuit d'un mois"
     ),
 
+    STANDARD(
+            "Plan Standard",
+            new BigDecimal("5500"),   // 5 500 FCFA/compte/mois
+            -1,  // Illimité
+            20,  // Max 20 pharmacies
+            true,
+            false,
+            "1 compte syndicat — 5 500 FCFA/mois"
+    ),
+
     COMMUNE(
             "Plan Commune",
-            new BigDecimal("25000"),  // 25 000 FCFA/mois
+            new BigDecimal("5500"),   // 5 500 FCFA/compte/mois
             -1,  // Illimité
             50,  // Max 50 pharmacies (une commune)
             true,
             false,
-            "Gestion des pharmacies d'une commune"
+            "Gestion des pharmacies d'une commune — 5 500 FCFA/compte"
     ),
 
     DEPARTEMENT(
             "Plan Département",
-            new BigDecimal("75000"),  // 75 000 FCFA/mois
+            new BigDecimal("8000"),   // 8 000 FCFA/mois (2 comptes inclus)
             -1,  // Illimité
             200, // Max 200 pharmacies (un département)
             true,
             true,
-            "Gestion des pharmacies d'un département entier"
+            "Gestion des pharmacies d'un département — 8 000 FCFA/mois"
+    ),
+
+    REGION(
+            "Plan Région",
+            new BigDecimal("33000"),  // 6 comptes × 5 500 FCFA
+            -1,  // Illimité
+            1000, // Max 1000 pharmacies (une région entière)
+            true,
+            true,
+            "Gestion des pharmacies d'une région entière — 33 000 FCFA/mois"
     );
 
     private final String libelle;

@@ -1,0 +1,57 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Systemd Service - SunuFarmasi API
+# Installer sur le serveur Debian :
+#   sudo cp sunufarmasi-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable sunufarmasi-api
+#   sudo systemctl start sunufarmasi-api
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[Unit]
+Description=SunuFarmasi API - Spring Boot
+After=network.target postgresql.service redis.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=sunufarmasi
+Group=sunufarmasi
+WorkingDirectory=/opt/sunufarmasi
+
+# Charger les variables d'environnement depuis .env
+EnvironmentFile=/opt/sunufarmasi/.env
+
+# Commande de démarrage
+ExecStart=/usr/bin/java \
+  -Xmx512m \
+  -Xms256m \
+  -XX:+UseG1GC \
+  -XX:+UseContainerSupport \
+  -Djava.security.egd=file:/dev/./urandom \
+  -Dspring.profiles.active=prod \
+  -jar /opt/sunufarmasi/sunufarmasi-api.jar
+
+# Redémarrage automatique en cas de crash
+Restart=always
+RestartSec=10
+
+# Timeout
+TimeoutStartSec=120
+TimeoutStopSec=30
+
+# Logs systemd
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sunufarmasi-api
+
+# Sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/sunufarmasi /var/log/sunufarmasi
+
+# Limites
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

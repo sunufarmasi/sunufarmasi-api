@@ -1,0 +1,170 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONFIGURATION PRODUCTION - Serveur Debian
+# ═══════════════════════════════════════════════════════════════════════════════
+# Toutes les valeurs sensibles sont lues depuis les variables d'environnement.
+# Ne jamais mettre de secrets dans ce fichier.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spring:
+  application:
+    name: sunufarmasi-api
+
+  # ── Base de données PostgreSQL ──────────────────────────────────────────────
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  # ── JPA / Hibernate ─────────────────────────────────────────────────────────
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # ── SQL init (désactivé, Flyway/JPA gère le schéma) ─────────────────────────
+  sql:
+    init:
+      mode: never
+
+  # ── Redis (cache) ────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 10000ms
+
+  # ── Jackson ─────────────────────────────────────────────────────────────────
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # ── Mail (SMS via Email ou service externe) ──────────────────────────────────
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:sunufarmasi@gmail.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# ── Serveur ──────────────────────────────────────────────────────────────────
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+  error:
+    # Masquer les détails d'erreur en production
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  # Headers de sécurité
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 8192
+
+# ── JWT ──────────────────────────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION:3600000}       # 1h
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:2592000000}  # 30j
+  issuer: sunufarmasi-api
+
+# ── Configuration Application ────────────────────────────────────────────────
+app:
+  name: SunuFarmasi API
+  version: 1.0.0
+  description: API Backend pour SunuFarmasi - Localisateur de pharmacies au Sénégal
+
+  # OTP
+  otp:
+    length: 6
+    validity-minutes: 5
+    resend-cooldown-seconds: 60
+    max-attempts: 3
+
+  # CORS - Origines autorisées en production (virgule-séparée pour @Value)
+  cors:
+    allowed-origins: "${CORS_ORIGINS:https://sunufarmasi.app,https://sn.sunufarmasi.app,https://app.sunufarmasi.app,https://sunufarmasi.sn,https://app-sunufarmasi.web.app,https://app-sunufarmasi.firebaseapp.com,https://sunufarmasi-landingpage.web.app}"
+
+  # Endpoint d'initialisation (désactivé par défaut en prod)
+  init:
+    enabled: ${APP_INIT_ENABLED:false}
+
+# ── Swagger / OpenAPI (désactivé en production) ──────────────────────────────
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# ── Logging (minimal en production) ─────────────────────────────────────────
+logging:
+  level:
+    root: WARN
+    sn.sunufarmasi: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_PATH:/var/log/sunufarmasi}/api.log
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      max-history: 30
+      total-size-cap: 500MB
+
+# ── Actuator (monitoring) ────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+  info:
+    env:
+      enabled: true
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+
+info:
+  app:
+    name: ${app.name}
+    version: ${app.version}
+    description: ${app.description}

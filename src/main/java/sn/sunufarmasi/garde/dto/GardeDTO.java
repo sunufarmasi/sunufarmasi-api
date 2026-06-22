@@ -84,6 +84,23 @@ public class GardeDTO {
             LocalDateTime datePublication
     ) {}
 
+    /**
+     * Vue admin de tous les plannings (tous syndicats)
+     */
+    public record AdminPlanningResponse(
+            UUID id,
+            String titre,
+            LocalDate dateDebut,
+            LocalDate dateFin,
+            StatutPlanning statut,
+            String statutLibelle,
+            UUID syndicatId,
+            String syndicatNom,
+            String syndicatRegion,
+            int nombreGardes,
+            List<GardeResumeResponse> gardes
+    ) {}
+
     // ═══════════════════════════════════════════════════════════
     // GARDE DTOs (NOUVEAU MODÈLE PAR SEMAINE)
     // ═══════════════════════════════════════════════════════════

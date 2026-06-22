@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -95,16 +96,18 @@ import java.util.*;
 
 /**
  * Controller d'initialisation des données de test
- * ⚠️ À DÉSACTIVER EN PRODUCTION !
+ * Activé seulement si app.init.enabled=true dans .env
+ * En production : APP_INIT_ENABLED=false (valeur par défaut)
  *
  * @author WeCan
  * @since 1.0.0
  */
+@ConditionalOnProperty(name = "app.init.enabled", havingValue = "true", matchIfMissing = false)
 @RestController
 @RequestMapping("/api/v1/init")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Init", description = "⚠️ Initialisation des données de test - DÉSACTIVER EN PRODUCTION")
+@Tag(name = "Init", description = "Initialisation des données - Activé via APP_INIT_ENABLED=true")
 public class DataInitController {
 
     private final UserRepository userRepository;
@@ -385,6 +388,9 @@ public class DataInitController {
         int count = 0;
 
         Object[][] usersData = {
+                // Super Admin — Mohamed AL Amine MBENGUE
+                {"alamine@sunufarmasi.sn", "MBENGUE", "Mohamed AL Amine", "+221771000001", RoleUser.ADMIN},
+                // Admin générique
                 {"admin@sunufarmasi.sn", "DIOP", "Amadou", "+221771234567", RoleUser.ADMIN},
                 {"syndicat@sunufarmasi.sn", "NDIAYE", "Fatou", "+221772345678", RoleUser.ADMIN_SYNDICAT},
                 {"employe1@sunufarmasi.sn", "SOW", "Abdoulaye", "+221778901234", RoleUser.EMPLOYE},
@@ -531,7 +537,7 @@ public class DataInitController {
                         .email("contact." + code.toLowerCase().replace("-", "") + "@sunufarmasi.sn")
                         .commune(commune)
                         .pharmacienProprietaire(proprietaire)
-                        .statut(StatutPharmacie.VALIDEE)
+                        .statut(StatutPharmacie.ACTIVE)
                         .dateValidation(LocalDateTime.now().minusDays(30))
                         .accepteCommandes(true)
                         .proposeLivraison(count % 2 == 0)
@@ -581,11 +587,21 @@ public class DataInitController {
         // Récupérer quelques communes
         List<Commune> communes = communeRepository.findAll();
 
+        // 5 syndicats principaux + 4 sous-comptes — mot de passe: password123
+        // [nom, sigle, code, username, type, telephone, email]
         Object[][] syndicatsData = {
-                {"Syndicat des Pharmaciens de Dakar", "SPD", "SYN-DK-001", "syndicat.dakar", TypeSyndicat.DEPARTEMENT, "+221338001001"},
-                {"Syndicat des Pharmaciens de Thiès", "SPT", "SYN-TH-001", "syndicat.thies", TypeSyndicat.DEPARTEMENT, "+221339001001"},
-                {"Syndicat des Pharmaciens du Plateau", "SPP", "SYN-DK-002", "syndicat.plateau", TypeSyndicat.COMMUNE, "+221338001002"},
-                {"Syndicat des Pharmaciens de Mbour", "SPM", "SYN-MB-001", "syndicat.mbour", TypeSyndicat.COMMUNE, "+221339001002"}
+                // --- Comptes principaux ---
+                {"Syndicat des Pharmaciens de Dakar", "SPD", "SYN-DK-001", "syndicat.dakar", TypeSyndicat.DEPARTEMENT, "+221338001001", "dakar@syndicat.sn"},
+                {"Syndicat des Pharmaciens de Thiès", "SPT", "SYN-TH-001", "syndicat.thies", TypeSyndicat.DEPARTEMENT, "+221339001001", "thies@syndicat.sn"},
+                {"Syndicat des Pharmaciens du Plateau", "SPP", "SYN-DK-002", "syndicat.plateau", TypeSyndicat.COMMUNE, "+221338001002", "plateau@syndicat.sn"},
+                {"Syndicat des Pharmaciens de Mbour", "SPM", "SYN-MB-001", "syndicat.mbour", TypeSyndicat.COMMUNE, "+221339001002", "mbour@syndicat.sn"},
+                {"Syndicat des Pharmaciens de Saint-Louis", "SPSL", "SYN-SL-001", "syndicat.saintlouis", TypeSyndicat.DEPARTEMENT, "+221338001003", "saintlouis@syndicat.sn"},
+                // --- Sous-comptes Dakar (code = parent + "-S1/S2") ---
+                {"Syndicat Dakar — Secrétariat 1", "SPD-S1", "SYN-DK-001-S1", "syndicat.dakar.sec1", TypeSyndicat.COMMUNE, "+221338001011", "dakar.sec1@syndicat.sn"},
+                {"Syndicat Dakar — Secrétariat 2", "SPD-S2", "SYN-DK-001-S2", "syndicat.dakar.sec2", TypeSyndicat.COMMUNE, "+221338001012", "dakar.sec2@syndicat.sn"},
+                // --- Sous-comptes Thiès (code = parent + "-S1/S2") ---
+                {"Syndicat Thiès — Secrétariat 1", "SPT-S1", "SYN-TH-001-S1", "syndicat.thies.sec1", TypeSyndicat.COMMUNE, "+221339001011", "thies.sec1@syndicat.sn"},
+                {"Syndicat Thiès — Secrétariat 2", "SPT-S2", "SYN-TH-001-S2", "syndicat.thies.sec2", TypeSyndicat.COMMUNE, "+221339001012", "thies.sec2@syndicat.sn"}
         };
 
         int deptIndex = 0;
@@ -604,12 +620,12 @@ public class DataInitController {
                         .motDePasseHash(passwordEncoder.encode("password123"))
                         .type(type)
                         .telephone((String) data[5])
-                        .email(data[3] + "@sunufarmasi.sn")
+                        .email((String) data[6])
                         .nomResponsable("Dr. " + (count % 2 == 0 ? "DIOP" : "NDIAYE"))
                         .telephoneResponsable("+22177" + (1000000 + count))
                         .plan(type == TypeSyndicat.DEPARTEMENT ? PlanAbonnementSyndicat.DEPARTEMENT : PlanAbonnementSyndicat.COMMUNE)
                         .statutAbonnement(StatutAbonnement.ACTIF)
-                        .montantMensuel(type == TypeSyndicat.DEPARTEMENT ? new BigDecimal("75000") : new BigDecimal("25000"))
+                        .montantMensuel(type == TypeSyndicat.DEPARTEMENT ? new BigDecimal("8000") : new BigDecimal("5500"))
                         .essaiGratuit(false)
                         .dateDebutAbonnement(LocalDate.now().minusMonths(2))
                         .dateFinAbonnement(LocalDate.now().plusMonths(10))
@@ -2117,9 +2133,9 @@ public class DataInitController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> seedPayments() {
         log.info("POST /api/v1/init/seed-payments");
 
-        // Récupérer les abonnements payants (pas les essais gratuits)
-        List<Subscription> paidSubscriptions = subscriptionRepository.findAll().stream()
-                .filter(s -> !s.isTrial() && s.getPlan().getPrix() > 0)
+        // Récupérer les abonnements payants avec plan et patient chargés (JOIN FETCH)
+        List<Subscription> paidSubscriptions = subscriptionRepository.findAllPaidWithPlanAndPatient().stream()
+                .filter(s -> s.getPlan().getPrix() > 0)
                 .toList();
 
         if (paidSubscriptions.isEmpty()) {
@@ -3501,7 +3517,7 @@ public class DataInitController {
                         .email("contact." + code.toLowerCase().replace("-", "") + "@sunufarmasi.sn")
                         .commune(commune)
                         .pharmacienProprietaire(proprietaire)
-                        .statut(StatutPharmacie.VALIDEE)
+                        .statut(StatutPharmacie.ACTIVE)
                         .dateValidation(LocalDateTime.now().minusDays(30))
                         .accepteCommandes(true)
                         .proposeLivraison(i % 3 == 0) // 1 sur 3 propose la livraison
@@ -3652,7 +3668,7 @@ public class DataInitController {
         for (Commune commune : communes) {
             // Récupérer les pharmacies de cette commune
             List<Pharmacie> pharmaciesCommune = pharmacieRepository.findByCommuneIdAndStatut(
-                    commune.getId(), StatutPharmacie.VALIDEE);
+                    commune.getId(), StatutPharmacie.ACTIVE);
 
             if (pharmaciesCommune.isEmpty()) {
                 log.warn("⚠️ Aucune pharmacie pour la commune {}", commune.getNom());
@@ -3745,7 +3761,7 @@ public class DataInitController {
 
         for (Commune commune : communes) {
             List<Pharmacie> pharmaciesCommune = pharmacieRepository.findByCommuneIdAndStatut(
-                    commune.getId(), StatutPharmacie.VALIDEE);
+                    commune.getId(), StatutPharmacie.ACTIVE);
 
             if (pharmaciesCommune.size() <= 3) continue;
 
@@ -3975,6 +3991,306 @@ public class DataInitController {
         response.put("nouvellesGardes", result.getBody().data());
 
         return ResponseEntity.ok(ApiResponse.success("Reset gardes terminé", response));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // NETTOYAGE COMPTES INUTILES
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    @PostMapping("/clean-bad-accounts")
+    @Operation(summary = "Supprimer les comptes de test inutiles (CLIENT, EMPLOYE)")
+    @Transactional
+    public ResponseEntity<ApiResponse<Map<String, Object>>> cleanBadAccounts() {
+        log.info("🧹 Nettoyage des comptes inutiles...");
+
+        // Emails des mauvais comptes à supprimer
+        String[] badEmails = {
+            "client@test.sn",
+            "employe1@sunufarmasi.sn",
+            "employe2@sunufarmasi.sn",
+            "syndicat@sunufarmasi.sn"
+        };
+
+        int deleted = 0;
+        for (String email : badEmails) {
+            var userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                userRepository.delete(userOpt.get());
+                log.info("   🗑️ Supprimé : {}", email);
+                deleted++;
+            }
+        }
+
+        log.info("✅ {} comptes supprimés", deleted);
+
+        return ResponseEntity.ok(ApiResponse.success(deleted + " comptes supprimés", Map.of(
+            "deleted", deleted,
+            "goodAccounts", Map.of(
+                "superAdmin", "alamine@sunufarmasi.sn / password123",
+                "admin", "admin@sunufarmasi.sn / password123",
+                "syndicat_dakar", "syndicat.dakar / password123",
+                "syndicat_thies", "syndicat.thies / password123",
+                "syndicat_plateau", "syndicat.plateau / password123",
+                "syndicat_mbour", "syndicat.mbour / password123",
+                "syndicat_saintlouis", "syndicat.saintlouis / password123"
+            )
+        )));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PHARMACIES PAR SYNDICAT (seed complet avec assignation)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    @PostMapping("/seed-pharmacies-syndicats")
+    @Operation(summary = "Créer 10 pharmacies par syndicat et les assigner")
+    @Transactional
+    public ResponseEntity<ApiResponse<Map<String, Object>>> seedPharmaciesSyndicats() {
+        log.info("🏥 Seed pharmacies par syndicat...");
+
+        List<Syndicat> syndicats = syndicatRepository.findAll().stream()
+                .filter(s -> s.getStatut() != null && s.getStatut().name().equals("ACTIF"))
+                .limit(6)
+                .toList();
+
+        if (syndicats.isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error("Aucun syndicat trouvé. Exécutez d'abord /seed-syndicats")
+            );
+        }
+
+        List<Commune> communes = communeRepository.findAll();
+        if (communes.isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error("Aucune commune trouvée. Exécutez d'abord /seed-localisation")
+            );
+        }
+
+        // Assigner les pharmacies existantes sans syndicat
+        List<Pharmacie> sanssyndicat = pharmacieRepository.findBySyndicatIsNull();
+        int syndicatIdx = 0;
+        for (Pharmacie ph : sanssyndicat) {
+            ph.setSyndicat(syndicats.get(syndicatIdx % syndicats.size()));
+            pharmacieRepository.save(ph);
+            syndicatIdx++;
+        }
+        log.info("✅ {} pharmacies existantes assignées", sanssyndicat.size());
+
+        // Données des pharmacies (nom, adresse, quartier, suffix téléphone)
+        String[][][] pharmaciesParSyndicat = {
+            // Syndicat 0 — Dakar
+            {
+                {"Pharmacie du Plateau", "Avenue Pompidou", "Plateau", "3382"},
+                {"Pharmacie de la Médina", "Rue 10 Blaise Diagne", "Médina", "3383"},
+                {"Pharmacie des Almadies", "Route des Almadies", "Almadies", "3384"},
+                {"Grande Pharmacie HLM", "Avenue Bourguiba HLM", "HLM", "3385"},
+                {"Pharmacie de la Corniche", "Corniche Ouest", "Mermoz", "3386"},
+                {"Pharmacie Fann", "Avenue Cheikh Anta Diop", "Fann", "3387"},
+                {"Pharmacie Liberté", "Rue 10 Liberté 5", "Liberté", "3388"},
+                {"Pharmacie de Colobane", "Marché Colobane", "Colobane", "3389"},
+                {"Pharmacie Ouakam", "Avenue du Front de Terre", "Ouakam", "3390"},
+                {"Pharmacie Yoff", "Route de Yoff", "Yoff", "3391"},
+            },
+            // Syndicat 1 — Thiès
+            {
+                {"Pharmacie Centrale Thiès", "Avenue Léopold Sédar Senghor", "Centre", "3392"},
+                {"Pharmacie Thiès Nord", "Route de Dakar", "Nord", "3393"},
+                {"Pharmacie du Marché Thiès", "Place du Marché", "Marché", "3394"},
+                {"Pharmacie Nguinth", "Quartier Nguinth", "Nguinth", "3395"},
+                {"Pharmacie Diamaguène", "Cité Diamaguène", "Diamaguène", "3396"},
+                {"Pharmacie de Mbour Route", "Route de Mbour", "Sud", "3397"},
+                {"Pharmacie Thiès Gare", "Avenue de la Gare", "Gare", "3398"},
+                {"Pharmacie Thiès Escale", "Cité Escale", "Escale", "3399"},
+                {"Pharmacie Thiès Résidentiel", "Zone Résidentielle", "Résidentiel", "3400"},
+                {"Pharmacie Belle-Vue Thiès", "Quartier Belle-Vue", "Belle-Vue", "3401"},
+            },
+            // Syndicat 2 — Plateau
+            {
+                {"Pharmacie de l'Indépendance", "Place de l'Indépendance", "Plateau", "3402"},
+                {"Pharmacie Sandaga", "Marché Sandaga", "Sandaga", "3403"},
+                {"Pharmacie Tilène", "Marché Tilène", "Tilène", "3404"},
+                {"Pharmacie Derklé", "Cité Derklé", "Derklé", "3405"},
+                {"Pharmacie Castors", "Cité des Castors", "Castors", "3406"},
+                {"Pharmacie Grand-Dakar", "Cité Grand-Dakar", "Grand-Dakar", "3407"},
+                {"Pharmacie Hann Bel-Air", "Route de Hann", "Hann", "3408"},
+                {"Pharmacie Sicap Liberté", "Sicap Liberté 3", "Sicap", "3409"},
+                {"Pharmacie Point E", "Rue Aimé Césaire", "Point E", "3410"},
+                {"Pharmacie Amitié", "Cité de l'Amitié", "Amitié", "3411"},
+            },
+            // Syndicat 3 — Mbour
+            {
+                {"Pharmacie Centrale Mbour", "Avenue Valdiodio Ndiaye", "Centre", "3412"},
+                {"Pharmacie Mbour Bord de Mer", "Route de la Plage", "Plage", "3413"},
+                {"Pharmacie Saly", "Station Saly Portudal", "Saly", "3414"},
+                {"Pharmacie Mbour Marché", "Marché Central", "Marché", "3415"},
+                {"Pharmacie Thiès-Mbour", "Route Thiès", "Entrée ville", "3416"},
+                {"Pharmacie Joal", "Centre de Joal", "Joal", "3417"},
+                {"Pharmacie Fissel", "Quartier Central Fissel", "Fissel", "3418"},
+                {"Pharmacie Ngaparou", "Village de Ngaparou", "Ngaparou", "3419"},
+                {"Pharmacie Somone", "Route de Somone", "Somone", "3420"},
+                {"Pharmacie Popenguine", "Bourg de Popenguine", "Popenguine", "3421"},
+            },
+            // Syndicat 4 — Saint-Louis
+            {
+                {"Pharmacie Saint-Louis Centre", "Avenue Général de Gaulle", "Centre", "3422"},
+                {"Pharmacie de la Langue de Barbarie", "Île Nord", "Île Nord", "3423"},
+                {"Pharmacie Sor", "Quartier Sor", "Sor", "3424"},
+                {"Pharmacie Rocade", "Route de la Rocade", "Rocade", "3425"},
+                {"Pharmacie Guet Ndar", "Village de Guet Ndar", "Guet Ndar", "3426"},
+                {"Pharmacie Saint-Louis Sud", "Sortie Sud", "Sud", "3427"},
+                {"Pharmacie Ndar", "Place Faidherbe", "Ndar", "3428"},
+                {"Pharmacie Lagon", "Résidence du Lagon", "Lagon", "3429"},
+                {"Pharmacie Emile Badiane", "Rue Emile Badiane", "Centre", "3430"},
+                {"Pharmacie Sanar", "Université Gaston Berger zone", "Sanar", "3431"},
+            },
+            // Syndicat 5 — Extra
+            {
+                {"Pharmacie Kaolack Centre", "Avenue Léopold Sédar Senghor", "Centre", "3432"},
+                {"Pharmacie Rufisque", "Avenue Malick Sy", "Rufisque", "3433"},
+                {"Pharmacie Ziguinchor", "Rue du Commerce", "Ziguinchor", "3434"},
+                {"Pharmacie Louga", "Avenue de la Gare", "Louga", "3435"},
+                {"Pharmacie Diourbel", "Place de l'Indépendance", "Diourbel", "3436"},
+                {"Pharmacie Fatick", "Avenue Valdiodio Ndiaye", "Fatick", "3437"},
+                {"Pharmacie Tambacounda", "Avenue El Hadj Malick Sy", "Tambacounda", "3438"},
+                {"Pharmacie Kolda", "Quartier Commercial", "Kolda", "3439"},
+                {"Pharmacie Matam", "Avenue de l'Indépendance", "Matam", "3440"},
+                {"Pharmacie Kédougou", "Centre Administratif", "Kédougou", "3441"},
+            }
+        };
+
+        // Noms de pharmaciens réels
+        String[][] medecins = {
+            {"DIOP", "Amadou"}, {"NDIAYE", "Fatou"}, {"FALL", "Ibrahima"}, {"SARR", "Aminata"},
+            {"GUEYE", "Moussa"}, {"DIALLO", "Aïssatou"}, {"BA", "Ousmane"}, {"SOW", "Mariama"},
+            {"MBAYE", "Cheikh"}, {"FAYE", "Ndèye"}, {"SECK", "Pape"}, {"THIAM", "Sokhna"},
+            {"KANE", "Modou"}, {"CISSE", "Khady"}, {"DIOUF", "Malick"}, {"NIANG", "Coumba"},
+            {"TALL", "Babacar"}, {"WADE", "Rama"}, {"LY", "Aliou"}, {"TOURE", "Binta"},
+            {"NIANG", "Abdoulaye"}, {"DIAGNE", "Rokhaya"}, {"SAMB", "Ibou"}, {"KHOUMA", "Dieynaba"},
+            {"BODIAN", "Cheikh Ibra"}, {"CAMARA", "Thierno"}, {"SALL", "Mamadou"}, {"DEME", "Nafissatou"},
+            {"FOFANA", "Oumar"}, {"BALDE", "Fatoumata"}, {"KOUYATE", "Seydou"}, {"DIEYE", "Aida"},
+            {"THIOUNE", "Boubacar"}, {"FALL", "Coumba"}, {"MBENGUE", "Lamine"}, {"GNING", "Awa"},
+            {"DIOUF", "Serigne"}, {"SENE", "Mariama"}, {"NDIAYE", "Mouhamed"}, {"DIOP", "Bineta"},
+            {"GUISSE", "Mamadou"}, {"GUEYE", "Rokhaya"}, {"SECK", "El Hadji"}, {"DIALLO", "Khady"},
+            {"SARR", "Babacar"}, {"FALL", "Adja"}, {"NDIAYE", "Oumar"}, {"DIOP", "Sokhna"},
+            {"BA", "Modou"}, {"GAYE", "Fatoumata"},
+        };
+
+        List<Pharmacien> pharmaciensExistants = pharmacienRepository.findAll();
+        int totalCreated = 0;
+        int medIdx = 0;
+        int codeCounter = (int) pharmacieRepository.count() + 1;
+
+        for (int s = 0; s < Math.min(syndicats.size(), pharmaciesParSyndicat.length); s++) {
+            Syndicat syndicat = syndicats.get(s);
+            String[][] pharmData = pharmaciesParSyndicat[s];
+            Commune commune = syndicat.getCommune() != null ? syndicat.getCommune()
+                    : (syndicat.getDepartement() != null && !communeRepository.findAll().isEmpty()
+                        ? communeRepository.findAll().stream()
+                            .filter(c -> {
+                                try { return c.getDepartement().getId().equals(syndicat.getDepartement().getId()); }
+                                catch (Exception e) { return false; }
+                            }).findFirst().orElse(communes.get(0))
+                        : communes.get(0));
+
+            // Coordonnées de base par syndicat
+            double baseLat = 14.6928 - (s * 0.05);
+            double baseLng = -17.4467 + (s * 0.03);
+
+            for (int i = 0; i < pharmData.length; i++) {
+                String[] pd = pharmData[i];
+                String code = String.format("PHSYN-%02d-%03d", s + 1, i + 1);
+                if (pharmacieRepository.existsByCode(code)) continue;
+
+                String telSuffix = pd[3];
+                String telephone = "+22133" + telSuffix + String.format("%03d", i);
+                if (pharmacieRepository.existsByTelephone(telephone)) {
+                    telephone = "+22133" + telSuffix + String.format("%03d", 900 + codeCounter);
+                }
+
+                // Choisir ou créer un pharmacien
+                Pharmacien proprietaire;
+                if (!pharmaciensExistants.isEmpty()) {
+                    proprietaire = pharmaciensExistants.get(medIdx % pharmaciensExistants.size());
+                } else {
+                    String[] m = medecins[medIdx % medecins.length];
+                    String tel2 = String.format("+22177%07d", 5000000 + medIdx);
+                    if (pharmacienRepository.existsByTelephone(tel2)) tel2 = String.format("+22177%07d", 8000000 + medIdx);
+                    proprietaire = Pharmacien.builder()
+                            .nom(m[0]).prenom(m[1])
+                            .email(m[1].toLowerCase() + "." + m[0].toLowerCase() + medIdx + "@gmail.com")
+                            .telephone(tel2)
+                            .motDePasseHash(passwordEncoder.encode("password123"))
+                            .numeroOrdreNational("ORD-SN-" + String.format("%04d", medIdx + 100))
+                            .universiteFormation("UCAD")
+                            .anneeDiplome(2010 + (medIdx % 12))
+                            .type(sn.sunufarmasi.pharmacie.enums.TypePharmacien.PROPRIETAIRE)
+                            .plan(sn.sunufarmasi.pharmacie.enums.PlanAbonnementPharmacie.PREMIUM)
+                            .statutAbonnement(sn.sunufarmasi.pharmacie.enums.StatutAbonnement.ACTIF)
+                            .montantMensuel(new java.math.BigDecimal("25000"))
+                            .essaiGratuit(false)
+                            .dateDebutAbonnement(java.time.LocalDate.now().minusMonths(3))
+                            .dateFinAbonnement(java.time.LocalDate.now().plusMonths(9))
+                            .nombreEmployesMax(5).nombrePharmaciesMax(5).nombrePharmaciesActuelles(0)
+                            .actif(true).valideParOrdre(true).compteVerifie(true)
+                            .sexe(medIdx % 2 == 0 ? "M" : "F")
+                            .build();
+                    proprietaire = pharmacienRepository.save(proprietaire);
+                    pharmaciensExistants = pharmacienRepository.findAll();
+                }
+
+                double lat = baseLat + (i * 0.004) - 0.02;
+                double lng = baseLng + ((i % 3) * 0.005) - 0.007;
+
+                String[] m = medecins[medIdx % medecins.length];
+                String raisonSociale = "Dr. " + m[1] + " " + m[0];
+
+                Pharmacie pharmacie = Pharmacie.builder()
+                        .nom(pd[0])
+                        .code(code)
+                        .raisonSociale(raisonSociale)
+                        .adresseComplete(pd[1] + ", " + pd[2])
+                        .quartier(pd[2])
+                        .latitude(lat)
+                        .longitude(lng)
+                        .telephone(telephone)
+                        .email("contact." + code.toLowerCase().replace("-", "") + "@sunufarmasi.sn")
+                        .commune(commune)
+                        .pharmacienProprietaire(proprietaire)
+                        .syndicat(syndicat)
+                        .statut(StatutPharmacie.ACTIVE)
+                        .dateValidation(java.time.LocalDateTime.now().minusDays(30))
+                        .numeroAgrementMinistere("AGR-" + String.format("%04d", codeCounter))
+                        .numeroOrdre("ORD-PH-" + String.format("%04d", codeCounter))
+                        .dateOuverture(java.time.LocalDate.of(2015 + (codeCounter % 8), (codeCounter % 12) + 1, 1))
+                        .accepteCommandes(true)
+                        .proposeLivraison(i % 3 == 0)
+                        .rayonLivraisonKm(i % 3 == 0 ? 5 : null)
+                        .notificationsActives(true)
+                        .build();
+
+                pharmacieRepository.save(pharmacie);
+
+                // Incrémenter compteur pharmacien
+                proprietaire.ajouterPharmacie();
+                pharmacienRepository.save(proprietaire);
+
+                // Incrémenter compteur syndicat
+                syndicat.setNombrePharmaciesActuelles(syndicat.getNombrePharmaciesActuelles() + 1);
+
+                totalCreated++;
+                codeCounter++;
+                medIdx++;
+                log.info("   ✅ {} → syndicat {}", pd[0], syndicat.getNom());
+            }
+            syndicatRepository.save(syndicat);
+        }
+
+        log.info("✅ {} pharmacies créées et assignées aux syndicats", totalCreated);
+
+        return ResponseEntity.ok(ApiResponse.success(totalCreated + " pharmacies créées et assignées", Map.of(
+                "totalCreated", totalCreated,
+                "syndicats", syndicats.size(),
+                "assignedExisting", sanssyndicat.size()
+        )));
     }
 
 }

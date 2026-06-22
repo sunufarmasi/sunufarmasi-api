@@ -27,6 +27,9 @@ public class PatientMapper {
         // Commune
         PatientResponse.CommuneSimpleDto communeDto = null;
         if (patient.getCommune() != null) {
+            String departementNom = patient.getCommune().getDepartement() != null
+                    ? patient.getCommune().getDepartement().getNom()
+                    : null;
             String regionNom = patient.getCommune().getDepartement() != null &&
                     patient.getCommune().getDepartement().getRegion() != null
                     ? patient.getCommune().getDepartement().getRegion().getNom()
@@ -43,6 +46,7 @@ public class PatientMapper {
             communeDto = new PatientResponse.CommuneSimpleDto(
                     patient.getCommune().getId().toString(),
                     patient.getCommune().getNom(),
+                    departementNom,
                     regionNom,
                     coordinates
             );
@@ -61,6 +65,10 @@ public class PatientMapper {
                 patient.isEmailVerified(),
                 patient.isTelephoneVerified(),
                 patient.isActif(),
+                patient.isPremiumActif(),
+                patient.getDateFinPremium(),
+                patient.getMontantPremium(),
+                patient.getReferencePaiement(),
                 patient.getLastLoginAt(),
                 patient.getCreatedAt()
         );

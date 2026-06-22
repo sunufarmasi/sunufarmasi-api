@@ -23,6 +23,11 @@ public enum PaymentStatus {
     FAILED,
 
     /**
+     * Paiement manuel en attente de validation admin
+     */
+    PENDING_VALIDATION,
+
+    /**
      * Paiement annulé
      */
     CANCELLED,

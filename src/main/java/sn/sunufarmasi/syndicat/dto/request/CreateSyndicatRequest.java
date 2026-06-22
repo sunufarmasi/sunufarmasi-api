@@ -3,98 +3,73 @@ package sn.sunufarmasi.syndicat.dto.request;
 import jakarta.validation.constraints.*;
 import sn.sunufarmasi.syndicat.enums.TypeSyndicat;
 
+import java.util.List;
 import java.util.UUID;
 
-/**
- * DTO Request pour la création d'un syndicat (par Admin)
- *
- * @author WeCan
- * @since 1.0.0
- */
 public record CreateSyndicatRequest(
 
         @NotBlank(message = "Le nom est obligatoire")
-        @Size(max = 200, message = "Le nom ne doit pas dépasser 200 caractères")
+        @Size(max = 200)
         String nom,
 
-        @Size(max = 500, message = "La description ne doit pas dépasser 500 caractères")
+        @Size(max = 500)
         String description,
 
-        // ═══════════════════════════════════════════════════════════
-        // AUTHENTIFICATION
-        // ═══════════════════════════════════════════════════════════
-
+        // ── Authentification ──────────────────────────────────────
         @NotBlank(message = "Le username est obligatoire")
-        @Size(min = 4, max = 50, message = "Le username doit contenir entre 4 et 50 caractères")
-        @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Le username ne peut contenir que des lettres, chiffres, tirets et underscores")
+        @Size(min = 4, max = 50)
+        @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "Le username ne peut contenir que des lettres, chiffres, points, tirets et underscores")
         String username,
 
         @NotBlank(message = "Le mot de passe est obligatoire")
-        @Size(min = 8, max = 100, message = "Le mot de passe doit contenir entre 8 et 100 caractères")
+        @Size(min = 8, max = 100)
         String motDePasse,
 
-        // ═══════════════════════════════════════════════════════════
-        // TYPE ET ZONE GÉOGRAPHIQUE
-        // ═══════════════════════════════════════════════════════════
-
+        // ── Type et zone géographique ─────────────────────────────
         @NotNull(message = "Le type de syndicat est obligatoire")
         TypeSyndicat type,
 
-        /**
-         * ID de la commune (obligatoire si type = COMMUNE)
-         */
+        /** Pour type = COMMUNE */
         UUID communeId,
 
-        /**
-         * ID du département (obligatoire si type = DEPARTEMENT)
-         */
+        /** Pour type = ZONE (plusieurs communes spécifiques) */
+        List<UUID> communeIds,
+
+        /** Pour type = DEPARTEMENT */
         UUID departementId,
 
-        // ═══════════════════════════════════════════════════════════
-        // CONTACT
-        // ═══════════════════════════════════════════════════════════
+        /** Pour type = REGION */
+        UUID regionId,
 
+        // ── Contact ───────────────────────────────────────────────
         @NotBlank(message = "Le téléphone est obligatoire")
-        @Pattern(regexp = "^\\+221[0-9]{9}$", message = "Format téléphone invalide (ex: +221771234567)")
+        @Pattern(regexp = "^\\+221[0-9]{9}$")
         String telephone,
 
-        @Pattern(regexp = "^(\\+221[0-9]{9})?$", message = "Format téléphone secondaire invalide")
+        @Pattern(regexp = "^(\\+221[0-9]{9})?$")
         String telephoneSecondaire,
 
         @NotBlank(message = "L'email est obligatoire")
-        @Email(message = "Format email invalide")
-        @Size(max = 100, message = "L'email ne doit pas dépasser 100 caractères")
+        @Email
+        @Size(max = 100)
         String email,
 
-        @Size(max = 500, message = "L'adresse ne doit pas dépasser 500 caractères")
+        @Size(max = 500)
         String adresse,
 
-        // ═══════════════════════════════════════════════════════════
-        // RESPONSABLE (optionnel)
-        // ═══════════════════════════════════════════════════════════
-
-        /**
-         * ID du pharmacien responsable (optionnel)
-         */
+        // ── Responsable ───────────────────────────────────────────
         UUID responsableId,
 
-        /**
-         * Nom du responsable si pas de compte pharmacien
-         */
-        @Size(max = 200, message = "Le nom du responsable ne doit pas dépasser 200 caractères")
+        @Size(max = 200)
         String nomResponsable
 
 ) {
-    /**
-     * Validation personnalisée : soit communeId soit departementId selon le type
-     */
     public boolean isZoneValid() {
-        if (type == TypeSyndicat.COMMUNE) {
-            return communeId != null;
-        }
-        if (type == TypeSyndicat.DEPARTEMENT) {
-            return departementId != null;
-        }
-        return false;
+        return switch (type) {
+            case COMMUNE     -> communeId != null;
+            case ZONE        -> communeIds != null && !communeIds.isEmpty();
+            case DEPARTEMENT -> departementId != null;
+            case REGION      -> regionId != null;
+        };
     }
 }

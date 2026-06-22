@@ -174,7 +174,7 @@ public class SecurityConfig {
             "http://127.0.0.1:5173",
             "https://sunufarmasi.sn",   // Production
             "https://www.sunufarmasi.sn",
-            "https://sunufarmasi-api.onrender.com"
+            "https://app.sunufarmasi.sn"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

@@ -1,47 +1,50 @@
 package sn.sunufarmasi.syndicat.dto.request;
 
 import jakarta.validation.constraints.*;
+import sn.sunufarmasi.syndicat.enums.TypeSyndicat;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
  * DTO Request pour la modification d'un syndicat
- *
- * @author WeCan
- * @since 1.0.0
  */
 public record UpdateSyndicatRequest(
 
-        @Size(max = 200, message = "Le nom ne doit pas dépasser 200 caractères")
+        @Size(max = 200)
         String nom,
 
-        @Size(max = 500, message = "La description ne doit pas dépasser 500 caractères")
+        @Size(max = 500)
         String description,
 
-        // ═══════════════════════════════════════════════════════════
-        // CONTACT
-        // ═══════════════════════════════════════════════════════════
-
-        @Pattern(regexp = "^\\+221[0-9]{9}$", message = "Format téléphone invalide (ex: +221771234567)")
+        // ── Contact ──────────────────────────────────────────────
+        @Pattern(regexp = "^(\\+221[0-9]{9})?$")
         String telephone,
 
-        @Pattern(regexp = "^(\\+221[0-9]{9})?$", message = "Format téléphone secondaire invalide")
+        @Pattern(regexp = "^(\\+221[0-9]{9})?$")
         String telephoneSecondaire,
 
-        @Email(message = "Format email invalide")
-        @Size(max = 100, message = "L'email ne doit pas dépasser 100 caractères")
+        @Email
+        @Size(max = 100)
         String email,
 
-        @Size(max = 500, message = "L'adresse ne doit pas dépasser 500 caractères")
+        @Size(max = 500)
         String adresse,
 
-        // ═══════════════════════════════════════════════════════════
-        // RESPONSABLE
-        // ═══════════════════════════════════════════════════════════
-
+        // ── Responsable ───────────────────────────────────────────
         UUID responsableId,
 
-        @Size(max = 200, message = "Le nom du responsable ne doit pas dépasser 200 caractères")
-        String nomResponsable
+        @Size(max = 200)
+        String nomResponsable,
+
+        @Pattern(regexp = "^(\\+221[0-9]{9})?$")
+        String telephoneResponsable,
+
+        // ── Zone géographique (optionnel — si on veut changer la zone) ──
+        TypeSyndicat type,        // nouveau type (COMMUNE, ZONE, DEPARTEMENT, REGION)
+        UUID communeId,           // pour COMMUNE
+        UUID departementId,       // pour DEPARTEMENT
+        UUID regionId,            // pour REGION
+        List<UUID> communeIds     // pour ZONE (plusieurs communes)
 
 ) {}

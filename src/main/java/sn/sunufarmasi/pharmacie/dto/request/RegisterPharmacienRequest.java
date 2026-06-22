@@ -6,9 +6,7 @@ import java.time.LocalDate;
 
 /**
  * DTO Request pour l'inscription d'un pharmacien
- *
- * @author WeCan
- * @since 1.0.0
+ * Seuls nom, prénom et téléphone sont obligatoires (création admin depuis fichier CSV).
  */
 public record RegisterPharmacienRequest(
 
@@ -24,28 +22,28 @@ public record RegisterPharmacienRequest(
         @Pattern(regexp = "^\\+221[0-9]{9}$", message = "Format téléphone invalide (ex: +221771234567)")
         String telephone,
 
-        @NotBlank(message = "L'email est obligatoire")
+        // Optionnel — pas toujours disponible lors de la saisie admin
         @Email(message = "Format email invalide")
         @Size(max = 100, message = "L'email ne doit pas dépasser 100 caractères")
         String email,
 
-        @NotNull(message = "La date de naissance est obligatoire")
+        // Optionnel
         @Past(message = "La date de naissance doit être dans le passé")
         LocalDate dateNaissance,
 
-        @NotBlank(message = "Le sexe est obligatoire")
+        // Optionnel — défaut M si absent
         @Pattern(regexp = "^[MF]$", message = "Le sexe doit être M ou F")
         String sexe,
 
-        @NotBlank(message = "Le numéro d'ordre national est obligatoire")
+        // Optionnel
         @Size(max = 50, message = "Le numéro d'ordre ne doit pas dépasser 50 caractères")
         String numeroOrdreNational,
 
-        @NotBlank(message = "L'université de formation est obligatoire")
+        // Optionnel
         @Size(max = 200, message = "L'université ne doit pas dépasser 200 caractères")
         String universiteFormation,
 
-        @NotNull(message = "L'année de diplôme est obligatoire")
+        // Optionnel
         @Min(value = 1950, message = "L'année de diplôme doit être >= 1950")
         @Max(value = 2050, message = "L'année de diplôme doit être <= 2050")
         Integer anneeDiplome

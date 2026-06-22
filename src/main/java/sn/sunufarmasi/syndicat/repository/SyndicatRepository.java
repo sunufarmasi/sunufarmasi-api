@@ -48,9 +48,21 @@ public interface SyndicatRepository extends JpaRepository<Syndicat, UUID> {
 
     List<Syndicat> findByRegionId(UUID regionId);
 
+    /**
+     * Trouver le syndicat de type REGION pour une région donnée
+     */
+    @Query("SELECT s FROM Syndicat s WHERE s.region.id = :regionId AND s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.REGION AND s.statut != sn.sunufarmasi.syndicat.enums.StatutSyndicat.INACTIF")
+    Optional<Syndicat> findRegionSyndicatByRegionId(@Param("regionId") UUID regionId);
+
     boolean existsByCommuneId(UUID communeId);
 
     boolean existsByDepartementId(UUID departementId);
+
+    /**
+     * Vérifie si un syndicat de type REGION existe pour cette région
+     */
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Syndicat s WHERE s.region.id = :regionId AND s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.REGION AND s.statut != sn.sunufarmasi.syndicat.enums.StatutSyndicat.INACTIF")
+    boolean existsRegionSyndicatByRegionId(@Param("regionId") UUID regionId);
 
     // ═══════════════════════════════════════════════════════════
     // RECHERCHE PAR TYPE ET STATUT
@@ -83,13 +95,19 @@ public interface SyndicatRepository extends JpaRepository<Syndicat, UUID> {
      * (soit directement la commune, soit le département de la commune)
      */
     @Query("""
-        SELECT s FROM Syndicat s
+        SELECT DISTINCT s FROM Syndicat s LEFT JOIN s.communesZone cz
         WHERE s.statut = sn.sunufarmasi.syndicat.enums.StatutSyndicat.ACTIF
         AND (
             (s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.COMMUNE AND s.commune.id = :communeId)
             OR
+            (s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.ZONE AND cz.id = :communeId)
+            OR
             (s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.DEPARTEMENT AND s.departement.id = (
                 SELECT c.departement.id FROM Commune c WHERE c.id = :communeId
+            ))
+            OR
+            (s.type = sn.sunufarmasi.syndicat.enums.TypeSyndicat.REGION AND s.region.id = (
+                SELECT c.departement.region.id FROM Commune c WHERE c.id = :communeId
             ))
         )
         ORDER BY s.type ASC

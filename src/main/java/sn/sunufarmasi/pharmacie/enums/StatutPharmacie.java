@@ -18,6 +18,11 @@ public enum StatutPharmacie {
     VALIDEE,
 
     /**
+     * Active et visible publiquement (statut opérationnel normal)
+     */
+    ACTIVE,
+
+    /**
      * Rejetée par le syndicat (documents non conformes)
      */
     REJETEE,

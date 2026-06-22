@@ -121,6 +121,38 @@ public class Patient {
     private boolean actif = true;
 
     /**
+     * Abonnement premium actif (recherche médicaments + notifications gardes temps réel)
+     */
+    @Column(name = "premium_actif", nullable = false)
+    @Builder.Default
+    private boolean premiumActif = false;
+
+    /**
+     * Date de fin d'abonnement premium
+     */
+    @Column(name = "date_fin_premium")
+    private LocalDate dateFinPremium;
+
+    /**
+     * Montant mensuel premium (FCFA)
+     */
+    @Column(name = "montant_premium")
+    @Builder.Default
+    private Integer montantPremium = 0;
+
+    /**
+     * Référence du dernier paiement premium
+     */
+    @Column(name = "reference_paiement", length = 100)
+    private String referencePaiement;
+
+    /**
+     * Identifiant unique de l'appareil (device binding — 1 compte = 1 appareil)
+     */
+    @Column(name = "device_id", length = 255)
+    private String deviceId;
+
+    /**
      * Date de dernière connexion
      */
     @Column(name = "last_login_at")

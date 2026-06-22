@@ -30,8 +30,13 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
 
     /**
      * Trouver les gardes pour une semaine donnée dans une COMMUNE
+     * Inclut les gardes stockées au niveau commune ET au niveau département parent de cette commune
      */
-    @Query("SELECT g FROM Garde g WHERE g.commune.id = :communeId " +
+    @Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN g.departement dept " +
+            "WHERE (c.id = :communeId " +
+            "   OR dept.id = (SELECT com.departement.id FROM Commune com WHERE com.id = :communeId)) " +
             "AND g.dateDebut <= :dateFin AND g.dateFin >= :dateDebut " +
             "AND g.statut NOT IN ('ANNULEE') " +
             "ORDER BY g.dateDebut")
@@ -43,8 +48,13 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
 
     /**
      * Trouver les gardes pour une semaine donnée dans un DEPARTEMENT
+     * Inclut les gardes stockées au niveau département ET au niveau commune de ce département
      */
-    @Query("SELECT g FROM Garde g WHERE g.departement.id = :departementId " +
+    @Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.departement dept " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN c.departement cd " +
+            "WHERE (dept.id = :departementId OR cd.id = :departementId) " +
             "AND g.dateDebut <= :dateFin AND g.dateFin >= :dateDebut " +
             "AND g.statut NOT IN ('ANNULEE') " +
             "ORDER BY g.dateDebut")
@@ -56,8 +66,13 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
 
     /**
      * Trouver la garde pour une date spécifique dans une commune
+     * Inclut les gardes stockées au niveau commune ET au niveau département parent de cette commune
      */
-    @Query("SELECT g FROM Garde g WHERE g.commune.id = :communeId " +
+    @Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN g.departement dept " +
+            "WHERE (c.id = :communeId " +
+            "   OR dept.id = (SELECT com.departement.id FROM Commune com WHERE com.id = :communeId)) " +
             "AND :date BETWEEN g.dateDebut AND g.dateFin " +
             "AND g.statut NOT IN ('ANNULEE')")
     List<Garde> findByDateAndCommune(
@@ -67,8 +82,13 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
 
     /**
      * Trouver la garde pour une date spécifique dans un département
+     * Inclut les gardes stockées au niveau département ET au niveau commune de ce département
      */
-    @Query("SELECT g FROM Garde g WHERE g.departement.id = :departementId " +
+    @Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.departement dept " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN c.departement cd " +
+            "WHERE (dept.id = :departementId OR cd.id = :departementId) " +
             "AND :date BETWEEN g.dateDebut AND g.dateFin " +
             "AND g.statut NOT IN ('ANNULEE')")
     List<Garde> findByDateAndDepartement(
@@ -92,6 +112,11 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
      * Gardes d'une pharmacie
      */
     List<Garde> findByPharmacieId(UUID pharmacieId);
+
+    /**
+     * Supprimer toutes les gardes d'une pharmacie (avant suppression de la pharmacie)
+     */
+    void deleteByPharmacieId(UUID pharmacieId);
 
     /**
      * Gardes à venir d'une pharmacie
@@ -201,16 +226,16 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
     /**
      * Trouver les gardes pour une date spécifique dans une RÉGION (toutes les localités)
      */
-//     @Query("SELECT g FROM Garde g WHERE " +
-//             "(g.departement.region.id = :regionId OR g.commune.departement.region.id = :regionId) " +
-//             "AND :date BETWEEN g.dateDebut AND g.dateFin " +
-//             "AND g.statut NOT IN ('ANNULEE')")
-//     List<Garde> findByDateAndRegion(
-//             @Param("date") LocalDate date,
-//             @Param("regionId") UUID regionId
-//     );
+//    @Query("SELECT g FROM Garde g WHERE " +
+//            "(g.departement.region.id = :regionId OR g.commune.departement.region.id = :regionId) " +
+//            "AND :date BETWEEN g.dateDebut AND g.dateFin " +
+//            "AND g.statut NOT IN ('ANNULEE')")
+//    List<Garde> findByDateAndRegion(
+//            @Param("date") LocalDate date,
+//            @Param("regionId") UUID regionId
+//    );
 
-@Query("SELECT g FROM Garde g " +
+    @Query("SELECT g FROM Garde g " +
             "LEFT JOIN g.departement dept " +
             "LEFT JOIN dept.region r1 " +
             "LEFT JOIN g.commune c " +
@@ -223,12 +248,29 @@ public interface GardeRepository extends JpaRepository<Garde, UUID> {
             @Param("date") LocalDate date,
             @Param("regionId") UUID regionId
     );
+    /**
+     * Gardes du jour pour une liste de pharmacies (utilisé pour le secteur multi-syndicat)
+     */
+    @Query("SELECT g FROM Garde g " +
+            "WHERE g.pharmacie.id IN :pharmacieIds " +
+            "AND :date BETWEEN g.dateDebut AND g.dateFin " +
+            "AND g.statut NOT IN ('ANNULEE')")
+    List<Garde> findByDateAndPharmacieIds(
+            @Param("date") LocalDate date,
+            @Param("pharmacieIds") List<UUID> pharmacieIds
+    );
 
     /**
      * Trouver les gardes pour une semaine donnée dans une RÉGION
+     * Utilise LEFT JOIN pour couvrir les gardes stockées au niveau département ET commune
      */
-    @Query("SELECT g FROM Garde g WHERE " +
-            "(g.departement.region.id = :regionId OR g.commune.departement.region.id = :regionId) " +
+    @Query("SELECT g FROM Garde g " +
+            "LEFT JOIN g.departement dept " +
+            "LEFT JOIN dept.region r1 " +
+            "LEFT JOIN g.commune c " +
+            "LEFT JOIN c.departement cd " +
+            "LEFT JOIN cd.region r2 " +
+            "WHERE (r1.id = :regionId OR r2.id = :regionId) " +
             "AND g.dateDebut <= :dateFin AND g.dateFin >= :dateDebut " +
             "AND g.statut NOT IN ('ANNULEE') " +
             "ORDER BY g.dateDebut")

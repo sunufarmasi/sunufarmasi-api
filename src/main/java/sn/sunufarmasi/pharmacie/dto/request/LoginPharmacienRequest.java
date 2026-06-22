@@ -1,7 +1,5 @@
 package sn.sunufarmasi.pharmacie.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-
 /**
  * DTO Request pour la connexion d'un pharmacien
  *
@@ -10,7 +8,12 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record LoginPharmacienRequest(
 
-        @NotBlank(message = "Le téléphone est obligatoire")
-        String telephone
+        // Téléphone OU email — l'un des deux suffit
+        String telephone,
+
+        String email,
+
+        // Optionnel — si absent, aucune vérification de mot de passe (phase transition)
+        String motDePasse
 
 ) {}

@@ -7,12 +7,12 @@ import java.time.LocalDate;
 /**
  * DTO Request pour l'inscription d'un patient
  *
- * WORKFLOW SIMPLIFIÉ :
- * 1. Patient s'inscrit avec : Téléphone + Nom + Commune
- * 2. Vérifie son téléphone avec OTP
- * 3. Reçoit 15 jours d'essai gratuit automatiquement
- * 4. PIN de sécurité créé LOCALEMENT dans l'app mobile (pas en base)
- * 5. Après 15 jours → Doit payer pour continuer
+ * WORKFLOW :
+ * 1. Patient s'inscrit avec : Nom + Téléphone + Email + deviceId
+ * 2. Un code OTP est envoyé à l'email
+ * 3. Patient saisit le code → compte activé
+ * 4. 15 jours d'essai gratuit automatiquement
+ * 5. Après 15 jours → payer pour continuer
  *
  * @author WeCan
  * @since 1.0.0
@@ -30,30 +30,35 @@ public record RegisterPatientRequest(
         )
         String telephone,
 
-        @NotNull(message = "La commune est obligatoire")
+        @NotBlank(message = "L'email est obligatoire")
+        @Email(message = "Format d'email invalide")
+        @Size(max = 255)
+        String email,
+
+        @NotBlank(message = "L'identifiant de l'appareil est obligatoire")
+        String deviceId,
+
+        // Optionnel — peut être renseigné plus tard
         String communeId,
 
         LocalDate dateNaissance,
 
-        @Pattern(regexp = "M|F", message = "Sexe invalide. Valeurs acceptées: M ou F")
+        @Pattern(regexp = "M|F|", message = "Sexe invalide. Valeurs acceptées: M ou F")
         String sexe,
 
         String adresse
 ) {
-    /**
-     * Constructeur avec validation
-     */
     public RegisterPatientRequest {
-        // Normaliser le téléphone
         if (telephone != null) {
             telephone = telephone.trim();
-
-            // Ajouter +221 si manquant
             if (telephone.startsWith("7") && telephone.length() == 9) {
                 telephone = "+221" + telephone;
             } else if (telephone.startsWith("221") && telephone.length() == 12) {
                 telephone = "+" + telephone;
             }
+        }
+        if (email != null) {
+            email = email.trim().toLowerCase();
         }
     }
 }

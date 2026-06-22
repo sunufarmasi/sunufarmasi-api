@@ -75,6 +75,13 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Générer un token patient mobile (7 jours — sliding session)
+     */
+    public String generatePatientToken(String patientId) {
+        return generateTokenInternal(patientId, Collections.singletonList("PATIENT"), jwtConfig.getPatientTokenValidity());
+    }
+
+    /**
      * Générer un refresh token (sans rôles)
      */
     public String generateRefreshToken(String username) {

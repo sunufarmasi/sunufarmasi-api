@@ -162,7 +162,9 @@ public class PlanningGarde {
      * Vérifier si le planning est modifiable
      */
     public boolean isModifiable() {
-        return statut == StatutPlanning.BROUILLON || statut == StatutPlanning.EN_VALIDATION;
+        return statut == StatutPlanning.BROUILLON
+                || statut == StatutPlanning.EN_VALIDATION
+                || statut == StatutPlanning.PUBLIE;
     }
 
     /**

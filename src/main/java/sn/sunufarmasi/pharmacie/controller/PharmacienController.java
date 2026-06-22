@@ -5,9 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import sn.sunufarmasi.pharmacie.dto.request.LoginPharmacienRequest;
 import sn.sunufarmasi.pharmacie.dto.request.RegisterPharmacienRequest;
+import sn.sunufarmasi.pharmacie.dto.request.UpdatePharmacienRequest;
 import sn.sunufarmasi.pharmacie.dto.response.AuthResponse;
 import sn.sunufarmasi.pharmacie.dto.response.PharmacienResponse;
 import sn.sunufarmasi.pharmacie.service.PharmacienService;
@@ -102,5 +106,43 @@ public class PharmacienController {
         boolean canCreate = pharmacienService.canCreatePharmacie(pharmacienId);
 
         return ResponseEntity.ok(canCreate);
+    }
+
+    /**
+     * Modifier un pharmacien (Admin)
+     *
+     * PUT /api/v1/pharmaciens/{id}
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<PharmacienResponse> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdatePharmacienRequest request
+    ) {
+        log.info("API Admin - Modification pharmacien: {}", id);
+        return ResponseEntity.ok(pharmacienService.update(id, request));
+    }
+
+    /**
+     * Lister tous les pharmaciens (ADMIN)
+     * GET /api/v1/pharmaciens
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<PharmacienResponse>> getAll() {
+        log.info("API - Liste tous les pharmaciens");
+        return ResponseEntity.ok(pharmacienService.getAll());
+    }
+
+    /**
+     * Supprimer un pharmacien (Admin)
+     * DELETE /api/v1/pharmaciens/{id}/admin
+     */
+    @DeleteMapping("/{id}/admin")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<Void> supprimer(@PathVariable UUID id) {
+        log.info("API Admin - Suppression pharmacien: {}", id);
+        pharmacienService.supprimer(id);
+        return ResponseEntity.noContent().build();
     }
 }

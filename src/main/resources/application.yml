@@ -31,7 +31,8 @@ spring:
 
   # Configuration Base de données PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/sunufarmasi-develop
+    url: jdbc:postgresql://localhost:5432/sunufarmasi-dev
+    # url: jdbc:postgresql://localhost:5432/sunufarmasi-develop
     username: postgres
     password: R00t
     driver-class-name: org.postgresql.Driver
@@ -63,6 +64,22 @@ spring:
       mode: never
 #      data-locations: classpath:data.sql
 #  @Column(scale#      continue-on-error: false
+
+  # Configuration Email (SMTP) — simulation si MAIL_PASSWORD vide
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: sunufarmasi@gmail.com
+    password: "khli sqqj orji obho"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        debug: false
+    test-connection: false
 
   # Configuration Jackson
   jackson:
@@ -107,23 +124,17 @@ app:
     resend-cooldown-seconds: 60
     max-attempts: 3
 
-  # Configuration CORS
+  # Configuration CORS (virgule-séparée pour compatibilité @Value)
   cors:
-    allowed-origins:
-      - http://localhost:3000
-      - http://localhost:4200
-      - http://localhost:5173
-    allowed-methods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - PATCH
-      - OPTIONS
-    allowed-headers:
-      - "*"
-    allow-credentials: true
-    max-age: 3600
+    allowed-origins: "http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:8080,http://localhost:8100, http://10.152.2.151:8080, http://10.235.80.172:8080, http://192.168.1.37:8080"
+
+  # Endpoint d'initialisation : true en dev, false en prod (via APP_INIT_ENABLED dans .env)
+  init:
+    enabled: true
+
+  # Seed auto pharmacies au démarrage (si la table est vide)
+  seed:
+    pharmacies: true
 
 # Configuration Swagger/OpenAPI
 springdoc:
@@ -156,6 +167,14 @@ logging:
     max-size: 10MB
     max-history: 30
 
+# Configuration Wave Business Checkout
+wave:
+  api-key: ${WAVE_API_KEY:}
+  webhook-secret: ${WAVE_WEBHOOK_SECRET:}
+  api-url: https://api.wave.com/v1
+  success-url: sunufarmasi://payment/success
+  error-url: sunufarmasi://payment/error
+
 # Configuration Management (Actuator)
 management:
   endpoints:
@@ -169,9 +188,11 @@ management:
     env:
       enabled: true
 
+
 # Informations Application
 info:
   app:
     name: ${app.name}
     version: ${app.version}
     description: ${app.description}
+

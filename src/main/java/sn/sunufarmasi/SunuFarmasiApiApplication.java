@@ -18,6 +18,8 @@ package sn.sunufarmasi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Application principale PharmaGo
@@ -31,6 +33,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  */
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableAsync
+@EnableScheduling
 public class SunuFarmasiApiApplication {
 
     public static void main(String[] args) {

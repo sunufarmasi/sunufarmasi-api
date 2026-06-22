@@ -4,6 +4,20 @@
 -- =====================================================
 
 -- =====================================================
+-- FIX : Contrainte CHECK pour statut pharmacies
+-- (Hibernate update ne modifie pas les contraintes existantes)
+-- =====================================================
+ALTER TABLE pharmacies DROP CONSTRAINT IF EXISTS pharmacies_statut_check;
+ALTER TABLE pharmacies ADD CONSTRAINT pharmacies_statut_check
+    CHECK (statut IN ('EN_ATTENTE', 'VALIDEE', 'ACTIVE', 'REJETEE', 'SUSPENDUE', 'FERMEE'));
+
+-- FIX : Mise à jour des codes sous-comptes syndicats (anciens codes → nouveau format)
+UPDATE syndicats SET code = 'SYN-DK-001-S1' WHERE code = 'SYN-DK-SEC1';
+UPDATE syndicats SET code = 'SYN-DK-001-S2' WHERE code = 'SYN-DK-SEC2';
+UPDATE syndicats SET code = 'SYN-TH-001-S1' WHERE code = 'SYN-TH-SEC1';
+UPDATE syndicats SET code = 'SYN-TH-001-S2' WHERE code = 'SYN-TH-SEC2';
+
+-- =====================================================
 -- PAYS
 -- =====================================================
 INSERT INTO pays (id, code, nom, devise, fuseau_horaire, indicatif_telephonique, actif, created_at, updated_at)

@@ -140,4 +140,41 @@ public interface PharmacieRepository extends JpaRepository<Pharmacie, UUID> {
     List<Pharmacie> findByRegionAndStatut(
             @Param("regionId") UUID regionId,
             @Param("statut") StatutPharmacie statut);
+
+    // ═══════════════════════════════════════════════════════════
+    // SECTEUR (SYNDICAT PAR COMMUNE)
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Trouver le(s) syndicat(s) qui gèrent des pharmacies ACTIVE dans une commune donnée.
+     */
+    @Query("SELECT DISTINCT p.syndicat FROM Pharmacie p " +
+            "WHERE p.commune.id = :communeId " +
+            "AND p.statut = 'ACTIVE' " +
+            "AND p.syndicat IS NOT NULL")
+    List<sn.sunufarmasi.syndicat.entity.Syndicat> findSyndicatsByCommuneId(@Param("communeId") UUID communeId);
+
+    /**
+     * Toutes les pharmacies ACTIVE d'un syndicat.
+     */
+    List<Pharmacie> findBySyndicatIdAndStatut(UUID syndicatId, StatutPharmacie statut);
+
+    // ═══════════════════════════════════════════════════════════
+    // MÉTHODES POUR SEED / ADMIN
+    // ═══════════════════════════════════════════════════════════
+
+    List<Pharmacie> findBySyndicatIsNull();
+
+    boolean existsByTelephone(String telephone);
+
+    boolean existsByNumeroOrdre(String numeroOrdre);
+
+    List<Pharmacie> findBySyndicatId(UUID syndicatId);
+
+    List<Pharmacie> findByStatut(StatutPharmacie statut);
+
+    List<Pharmacie> findByNomContainingIgnoreCase(String nom);
+
+    @Query("SELECT p FROM Pharmacie p WHERE p.pharmacienProprietaire.id = :pharmacienId")
+    List<Pharmacie> findByPharmacienProprietaireId(@Param("pharmacienId") UUID pharmacienId);
 }

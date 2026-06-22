@@ -120,4 +120,29 @@ public interface PlanningGardeRepository extends JpaRepository<PlanningGarde, UU
     @Query("SELECT p FROM PlanningGarde p WHERE p.syndicat.id = :syndicatId " +
            "AND p.statut = 'PUBLIE' ORDER BY p.datePublication DESC LIMIT 1")
     Optional<PlanningGarde> findDernierPlanningPublie(@Param("syndicatId") UUID syndicatId);
+
+    /**
+     * Recherche par syndicat + période exacte (utile pour éviter les doublons au seed)
+     */
+    Optional<PlanningGarde> findBySyndicatIdAndDateDebutAndDateFin(
+            UUID syndicatId, LocalDate dateDebut, LocalDate dateFin);
+
+    // ═══════════════════════════════════════════════════════════
+    // SUPER ADMIN - TOUS LES PLANNINGS AVEC FILTRES
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Tous les plannings (tous syndicats) avec filtres optionnels : mois, syndicat, statut
+     */
+    @Query("SELECT p FROM PlanningGarde p WHERE " +
+           "((p.dateDebut BETWEEN :debut AND :fin) OR (p.dateFin BETWEEN :debut AND :fin) " +
+           "OR (p.dateDebut <= :debut AND p.dateFin >= :fin)) " +
+           "AND (:syndicatId IS NULL OR p.syndicat.id = :syndicatId) " +
+           "AND (:statut IS NULL OR p.statut = :statut) " +
+           "ORDER BY p.dateDebut DESC")
+    List<PlanningGarde> findAllAdminWithFilters(
+            @Param("debut") LocalDate debut,
+            @Param("fin") LocalDate fin,
+            @Param("syndicatId") UUID syndicatId,
+            @Param("statut") StatutPlanning statut);
 }

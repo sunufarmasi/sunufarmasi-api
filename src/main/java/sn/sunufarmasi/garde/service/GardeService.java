@@ -17,6 +17,8 @@ import sn.sunufarmasi.localisation.entity.Commune;
 import sn.sunufarmasi.localisation.entity.Departement;
 import sn.sunufarmasi.localisation.repository.CommuneRepository;
 import sn.sunufarmasi.localisation.repository.DepartementRepository;
+import sn.sunufarmasi.notification.enums.TypeNotification;
+import sn.sunufarmasi.notification.service.FcmService;
 import sn.sunufarmasi.notification.service.NotificationService;
 import sn.sunufarmasi.pharmacie.entity.Pharmacie;
 import sn.sunufarmasi.pharmacie.repository.PharmacieRepository;
@@ -27,6 +29,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 import java.util.List;
@@ -55,6 +58,35 @@ public class GardeService {
     private final CommuneRepository communeRepository;
     private final DepartementRepository departementRepository;
     private final NotificationService notificationService;
+    private final FcmService fcmService;
+
+    // ═══════════════════════════════════════════════════════════
+    // ADMIN - LISTE TOUTES LES GARDES
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Retourne toutes les gardes (pour le Super Admin)
+     */
+    @Transactional(readOnly = true)
+    public List<GardeResumeResponse> getAllGardesAdmin() {
+        return gardeRepository.findAll().stream()
+                .sorted((a, b) -> b.getDateDebut().compareTo(a.getDateDebut()))
+                .map(this::toGardeResumeResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retourne tous les plannings (tous syndicats) avec filtres — Super Admin
+     */
+    @Transactional(readOnly = true)
+    public List<AdminPlanningResponse> getAllPlanningsAdmin(YearMonth mois, UUID syndicatId, StatutPlanning statut) {
+        LocalDate debut = mois.atDay(1);
+        LocalDate fin   = mois.atEndOfMonth();
+        return planningRepository.findAllAdminWithFilters(debut, fin, syndicatId, statut)
+                .stream()
+                .map(this::toAdminPlanningResponse)
+                .collect(Collectors.toList());
+    }
 
     // ═══════════════════════════════════════════════════════════
     // GESTION DES PLANNINGS
@@ -112,15 +144,28 @@ public class GardeService {
 
         if (request.titre() != null) planning.setTitre(request.titre());
         if (request.description() != null) planning.setDescription(request.description());
-        if (request.dateDebut() != null) planning.setDateDebut(request.dateDebut());
-        if (request.dateFin() != null) planning.setDateFin(request.dateFin());
         if (request.publicationAuto() != null) planning.setPublicationAuto(request.publicationAuto());
         if (request.datePublicationPrevue() != null) planning.setDatePublicationPrevue(request.datePublicationPrevue());
         if (request.notifierPharmacies() != null) planning.setNotifierPharmacies(request.notifierPharmacies());
         if (request.notifierSms() != null) planning.setNotifierSms(request.notifierSms());
         if (request.notifierEmail() != null) planning.setNotifierEmail(request.notifierEmail());
 
+        boolean datesChanged = false;
+        if (request.dateDebut() != null) { planning.setDateDebut(request.dateDebut()); datesChanged = true; }
+        if (request.dateFin() != null)   { planning.setDateFin(request.dateFin());     datesChanged = true; }
+
         planning = planningRepository.save(planning);
+
+        // Synchroniser les dates de toutes les gardes du planning si les dates ont changé
+        if (datesChanged) {
+            List<Garde> gardes = gardeRepository.findByPlanningId(planningId);
+            for (Garde g : gardes) {
+                if (request.dateDebut() != null) g.setDateDebut(request.dateDebut());
+                if (request.dateFin() != null)   g.setDateFin(request.dateFin());
+            }
+            gardeRepository.saveAll(gardes);
+        }
+
         return toPlanningResponse(planning);
     }
 
@@ -171,17 +216,60 @@ public class GardeService {
         PlanningGarde planning = planningRepository.findById(planningId)
                 .orElseThrow(() -> new EntityNotFoundException("Planning non trouvé"));
 
+        if (planning.getStatut() == StatutPlanning.PUBLIE) {
+            throw new IllegalStateException("Ce planning est déjà publié");
+        }
+        // Chaîne automatique : BROUILLON → EN_VALIDATION → VALIDE → PUBLIE
+        if (planning.getStatut() == StatutPlanning.BROUILLON) {
+            if (planning.getGardes().isEmpty()) {
+                throw new IllegalStateException("Le planning doit contenir au moins une pharmacie de garde");
+            }
+            planning.soumettrePourValidation();
+        }
+        if (planning.getStatut() == StatutPlanning.EN_VALIDATION) {
+            planning.valider();
+        }
         if (planning.getStatut() != StatutPlanning.VALIDE) {
-            throw new IllegalStateException("Le planning doit être validé avant publication");
+            throw new IllegalStateException("Impossible de publier un planning en état : " + planning.getStatut());
         }
 
         planning.publier(publieParId);
         planning = planningRepository.save(planning);
         log.info("Planning {} publié", planningId);
 
+        // Mettre à jour immédiatement le statut des gardes si la période couvre aujourd'hui
+        LocalDate today = LocalDate.now();
+        for (Garde garde : planning.getGardes()) {
+            if (garde.getStatut() == StatutGarde.ANNULEE) continue;
+            if (!garde.getDateDebut().isAfter(today) && !garde.getDateFin().isBefore(today)) {
+                garde.setStatut(StatutGarde.EN_COURS);
+            } else if (garde.getDateDebut().isAfter(today)) {
+                garde.setStatut(StatutGarde.PLANIFIEE);
+            } else {
+                garde.setStatut(StatutGarde.TERMINEE);
+            }
+            gardeRepository.save(garde);
+        }
+
         // Notifier les pharmacies
         if (planning.getNotifierPharmacies()) {
             notifierPharmaciesPlanning(planning);
+        }
+
+        // Notification push FCM aux patients de la région
+        final PlanningGarde finalPlanning = planning;
+        try {
+            String nomSyndicat = planning.getSyndicat() != null ? planning.getSyndicat().getNom() : "Un syndicat";
+            String regionCode = "SN"; // Région par défaut
+            if (planning.getSyndicat() != null && planning.getSyndicat().getRegion() != null) {
+                regionCode = planning.getSyndicat().getRegion().getNom()
+                        .substring(0, Math.min(3, planning.getSyndicat().getRegion().getNom().length()))
+                        .toUpperCase();
+            }
+            String dateGarde = planning.getDateDebut() + " → " + planning.getDateFin();
+            fcmService.notifierGardesPubliees(regionCode, nomSyndicat, dateGarde);
+        } catch (Exception e) {
+            log.warn("Erreur notification FCM: {}", e.getMessage());
         }
 
         return toPlanningResponse(planning);
@@ -236,16 +324,18 @@ public class GardeService {
         Pharmacie pharmacie = pharmacieRepository.findById(request.pharmacieId())
                 .orElseThrow(() -> new EntityNotFoundException("Pharmacie non trouvée"));
 
-        // Calculer les dates de la semaine (samedi à vendredi)
-        LocalDate dateDebut = getDebutSemaine(request.dateGarde());
-        LocalDate dateFin = dateDebut.plusDays(6);
+        // Calculer les dates : utiliser les dates du planning (pas obligatoirement une semaine samedi→vendredi)
+        LocalDate dateDebut = planning.getDateDebut();
+        LocalDate dateFin = planning.getDateFin();
 
-        // Vérifier que la semaine est dans la période du planning
-        if (dateDebut.isBefore(planning.getDateDebut()) || dateFin.isAfter(planning.getDateFin())) {
-            throw new IllegalArgumentException("La semaine de garde doit être dans la période du planning");
+        // Vérifier que la dateGarde est dans la période du planning (validation souple)
+        if (request.dateGarde() != null &&
+                (request.dateGarde().isBefore(planning.getDateDebut()) || request.dateGarde().isAfter(planning.getDateFin()))) {
+            throw new IllegalArgumentException("La date de garde doit être dans la période du planning");
         }
 
         // Récupérer la zone (commune ou département)
+        // Si non fourni, utiliser la commune de la pharmacie automatiquement
         Commune commune = null;
         Departement departement = null;
         String zoneNom = null;
@@ -254,22 +344,26 @@ public class GardeService {
             commune = communeRepository.findById(request.communeId())
                     .orElseThrow(() -> new EntityNotFoundException("Commune non trouvée"));
             zoneNom = commune.getNom();
-
-            // Vérifier si une garde existe déjà pour cette semaine/commune/type
-            if (gardeRepository.existsBySemaineAndCommuneAndType(dateDebut, dateFin, commune.getId(), request.typeGarde())) {
-                throw new IllegalArgumentException("Une garde existe déjà pour cette semaine et cette commune");
-            }
         } else if (request.departementId() != null) {
             departement = departementRepository.findById(request.departementId())
                     .orElseThrow(() -> new EntityNotFoundException("Département non trouvé"));
             zoneNom = departement.getNom();
-
-            // Vérifier si une garde existe déjà pour cette semaine/département/type
-            if (gardeRepository.existsBySemaineAndDepartementAndType(dateDebut, dateFin, departement.getId(), request.typeGarde())) {
-                throw new IllegalArgumentException("Une garde existe déjà pour cette semaine et ce département");
-            }
+        } else if (pharmacie.getCommune() != null) {
+            // Auto-résolution : utiliser la commune de la pharmacie
+            commune = pharmacie.getCommune();
+            zoneNom = commune.getNom();
         } else {
-            throw new IllegalArgumentException("Une commune ou un département doit être spécifié");
+            zoneNom = pharmacie.getNom();
+        }
+
+        // Vérifier qu'une garde n'existe pas déjà pour ce planning+pharmacie
+        boolean gardeExistante = gardeRepository.findByPlanningId(planning.getId()).stream()
+                .anyMatch(g -> g.getPharmacie().getId().equals(pharmacie.getId()));
+        if (gardeExistante) {
+            log.warn("Garde déjà existante pour planning {} et pharmacie {} - ignorée", planningId, pharmacie.getNom());
+            return toGardeResponse(gardeRepository.findByPlanningId(planning.getId()).stream()
+                    .filter(g -> g.getPharmacie().getId().equals(pharmacie.getId()))
+                    .findFirst().orElseThrow());
         }
 
         Garde garde = Garde.builder()
@@ -626,7 +720,7 @@ public class GardeService {
             try {
                 notificationService.notifierPharmacie(
                         garde.getPharmacie().getId(),
-                        null,
+                        TypeNotification.RAPPEL_GARDE,
                         "Nouvelle garde planifiée",
                         String.format("Vous êtes de garde du %s au %s (%s) - Zone: %s",
                                 garde.getDateDebut(), garde.getDateFin(),
@@ -677,6 +771,22 @@ public class GardeService {
                 p.getId(), p.getTitre(), p.getDateDebut(), p.getDateFin(),
                 p.getStatut(), p.getStatut().getLibelle(),
                 p.getNombreGardes(), p.getPublicationAuto(), p.getDatePublication()
+        );
+    }
+
+    private AdminPlanningResponse toAdminPlanningResponse(PlanningGarde p) {
+        UUID syndicatId   = p.getSyndicat() != null ? p.getSyndicat().getId()   : null;
+        String syndicatNom = p.getSyndicat() != null ? p.getSyndicat().getNom() : "—";
+        String region = (p.getSyndicat() != null && p.getSyndicat().getRegion() != null)
+                ? p.getSyndicat().getRegion().getNom() : null;
+        List<GardeResumeResponse> gardes = p.getGardes().stream()
+                .map(this::toGardeResumeResponse)
+                .collect(Collectors.toList());
+        return new AdminPlanningResponse(
+                p.getId(), p.getTitre(), p.getDateDebut(), p.getDateFin(),
+                p.getStatut(), p.getStatut().getLibelle(),
+                syndicatId, syndicatNom, region,
+                p.getNombreGardes(), gardes
         );
     }
 

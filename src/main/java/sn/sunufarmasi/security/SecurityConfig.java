@@ -219,6 +219,7 @@
 package sn.sunufarmasi.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -231,6 +232,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -254,6 +256,10 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
 
+    // Virgule-séparée dans le YML : "http://localhost:3000,http://localhost:5173"
+    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:4200}")
+    private String[] allowedOrigins;
+
     /**
      * Routes publiques (sans authentification)
      */
@@ -263,6 +269,9 @@ public class SecurityConfig {
 
             // Auth Users (email/password) - pharmaciens, syndicats, admins
             "/api/v1/users/auth/**",
+
+            // Auth Syndicat (username/motDePasse)
+            "/api/v1/syndicats/login",
 
             // Init (⚠️ À désactiver en production)
             "/api/v1/init/**",
@@ -318,8 +327,15 @@ public class SecurityConfig {
                         // Routes publiques
                         .requestMatchers(PUBLIC_ROUTES).permitAll()
 
+                        .requestMatchers("/api/v1/public/**").permitAll()
+                        .requestMatchers("/ws/**", "/ws/info/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                         // Routes Admin
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // Tickets support (syndicat crée, admin répond)
+                        .requestMatchers("/api/v1/tickets/**").hasAnyRole("ADMIN", "SYNDICAT")
 
                         // Routes Syndicat
                         .requestMatchers("/api/v1/syndicat/**").hasAnyRole("ADMIN", "ADMIN_SYNDICAT")
@@ -333,7 +349,10 @@ public class SecurityConfig {
                         // Routes Patient
                         .requestMatchers("/api/v1/patients/me/**").hasRole("PATIENT")
                         .requestMatchers("/api/v1/subscriptions/me/**").hasRole("PATIENT")
-                        .requestMatchers("/api/v1/payments/**").hasRole("PATIENT")
+                        .requestMatchers("/api/v1/payments/pending-validation").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/payments/*/validate").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/payments/*/reject").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/payments/**").hasAnyRole("PATIENT", "ADMIN")
 
                         // Toutes les autres routes nécessitent une authentification
                         .anyRequest().authenticated()
@@ -356,21 +375,15 @@ public class SecurityConfig {
     }
 
     /**
-     * Configuration CORS
+     * Configuration CORS - origines lues depuis application.yml / .env
+     * Dev : localhost:3000, localhost:5173
+     * Prod : Firebase dashboard + landing page + domaine custom
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:4200",
-                "http://localhost:5173",
-                "http://localhost:8080",
-                "http://localhost:8100",
-                "https://sunufarmasi.sn",
-                "https://sunufarmasi-api.onrender.com"
-        ));
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

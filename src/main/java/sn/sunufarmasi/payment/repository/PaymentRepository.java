@@ -63,4 +63,9 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
      * Compter les paiements réussis d'un patient
      */
     long countByPatientIdAndStatus(UUID patientId, PaymentStatus status);
+
+    /**
+     * Trouver les paiements par statut (pour validation admin)
+     */
+    List<Payment> findByStatusOrderByCreatedAtDesc(PaymentStatus status);
 }

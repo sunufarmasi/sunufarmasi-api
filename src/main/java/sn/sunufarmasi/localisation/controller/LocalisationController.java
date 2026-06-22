@@ -32,6 +32,22 @@ public class LocalisationController {
     private final LocalisationService localisationService;
 
     // ═══════════════════════════════════════════════════════════
+    // LOCALISATIONS - Endpoint consolidé pour l'app mobile
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * GET /api/v1/public/localisations
+     * Retourne toutes les régions du Sénégal.
+     * Appelé par l'app mobile (ApiService.getLocalisations) au démarrage
+     * pour peupler le sélecteur de région.
+     */
+    @GetMapping("/public/localisations")
+    @Operation(summary = "Toutes les régions (app mobile)", description = "Endpoint consolidé utilisé par l'application mobile")
+    public ResponseEntity<List<RegionResponse>> getLocalisations() {
+        return ResponseEntity.ok(localisationService.getAllRegions());
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // PAYS - ENDPOINTS PUBLICS
     // ═══════════════════════════════════════════════════════════
 

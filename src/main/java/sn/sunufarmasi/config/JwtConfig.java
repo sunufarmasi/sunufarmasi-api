@@ -35,6 +35,12 @@ public class JwtConfig {
     private long refreshTokenValidity = 604800000L;
 
     /**
+     * Durée de validité du token patient mobile (en millisecondes)
+     * Défaut: 7 jours — sliding session via /refresh-token
+     */
+    private long patientTokenValidity = 604800000L; // 7 jours
+
+    /**
      * Préfixe du token dans le header Authorization
      */
     private String tokenPrefix = "Bearer ";

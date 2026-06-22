@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import sn.sunufarmasi.config.JwtConfig;
+import sn.sunufarmasi.patient.repository.PatientRepository;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtConfig jwtConfig;
+    private final PatientRepository patientRepository;
 
     /**
      * Filtrer chaque requête pour valider le token JWT
@@ -78,7 +81,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         })
                         .collect(Collectors.toList());
 
-                // 6. Créer l'authentification
+                // 6. Si le token appartient à un PATIENT, vérifier que le compte est actif
+                boolean isPatient = roles.stream().anyMatch(r ->
+                        r.equals("PATIENT") || r.equals("ROLE_PATIENT"));
+                if (isPatient) {
+                    try {
+                        UUID patientUuid = UUID.fromString(userId);
+                        boolean actif = patientRepository.findById(patientUuid)
+                                .map(p -> p.isActif())
+                                .orElse(false);
+                        if (!actif) {
+                            log.warn("🚫 Patient {} suspendu — requête bloquée: {}", userId, request.getRequestURI());
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                "{\"success\":false,\"message\":\"Votre compte a été désactivé. Contactez le support.\"}"
+                            );
+                            return;
+                        }
+                    } catch (Exception e) {
+                        log.error("Erreur vérification actif patient {}: {}", userId, e.getMessage());
+                    }
+                }
+
+                // 7. Créer l'authentification
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userId,  // Principal = userId
@@ -86,12 +112,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 authorities
                         );
 
-                // 7. Ajouter les détails de la requête
+                // 8. Ajouter les détails de la requête
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                // 8. Définir l'authentification dans le contexte de sécurité
+                // 9. Définir l'authentification dans le contexte de sécurité
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 log.debug("✅ Utilisateur authentifié: {} - Rôles: {} - URI: {}",

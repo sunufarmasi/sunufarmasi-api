@@ -65,7 +65,7 @@ INSERT INTO subscription_plans (
 );
 
 -- ═══════════════════════════════════════════════════════════
--- PLAN 3 : ANNUEL (8000 FCFA/an SANS pub)
+-- PLAN 3 : ANNUEL (7500 FCFA/an SANS pub)
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO subscription_plans (
     id,
@@ -83,8 +83,8 @@ INSERT INTO subscription_plans (
     gen_random_uuid(),
     'ANNUAL',
     'Abonnement Annuel',
-    'Le meilleur rapport qualité-prix ! 8000 FCFA pour 12 mois d''accès complet SANS PUBLICITÉ. Économisez 1000 FCFA par rapport au mensuel.',
-    8000,
+    'La meilleure offre ! Seulement 7 500 FCFA pour 12 mois d''accès complet SANS PUBLICITÉ. Économisez 1 500 FCFA par rapport au mensuel (2 mois offerts).',
+    7500,
     365,
     false,
     true,
@@ -113,5 +113,5 @@ ORDER BY ordre;
 -- |-------------|----------------------|-------------|----------|-----------|--------|
 -- | FREE_TRIAL  | Essai Gratuit        | 0 FCFA      | 15 jours | Avec pub  | Actif  |
 -- | MONTHLY     | Abonnement Mensuel   | 750 FCFA    | 30 jours | Avec pub  | Actif  |
--- | ANNUAL      | Abonnement Annuel    | 8000 FCFA   | 365 jours| Sans pub  | Actif  |
+-- | ANNUAL      | Abonnement Annuel    | 2500 FCFA   | 365 jours| Sans pub  | Actif  |
 -- ═══════════════════════════════════════════════════════════

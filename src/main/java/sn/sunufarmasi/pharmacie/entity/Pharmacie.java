@@ -138,6 +138,12 @@ public class Pharmacie {
     }
     */
 
+    @Column(columnDefinition = "TEXT")
+    private String description;          // Présentation libre de la pharmacie
+
+    @Column(length = 500)
+    private String services;             // Services proposés (texte libre ou liste séparée par virgule)
+
     // ═══════════════════════════════════════════════════════════
     // IMAGES
     // ═══════════════════════════════════════════════════════════
@@ -161,8 +167,8 @@ public class Pharmacie {
     private Syndicat syndicat;                   // Syndicat qui gère cette pharmacie (optionnel au début)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pharmacien_proprietaire_id", nullable = false)
-    private Pharmacien pharmacienProprietaire;   // Pharmacien qui possède cette pharmacie
+    @JoinColumn(name = "pharmacien_proprietaire_id", nullable = true)
+    private Pharmacien pharmacienProprietaire;   // Pharmacien qui possède cette pharmacie (optionnel)
 
     // ═══════════════════════════════════════════════════════════
     // STATUT PHARMACIE
@@ -196,6 +202,19 @@ public class Pharmacie {
     private Integer rayonLivraisonKm;
 
     private Boolean notificationsActives = true;
+
+    // ═══════════════════════════════════════════════════════════
+    // ABONNEMENT (5 000 FCFA/an)
+    // ═══════════════════════════════════════════════════════════
+
+    @Column(name = "date_dernier_paiement")
+    private LocalDateTime dateDernierPaiement;
+
+    @Column(name = "date_fin_abonnement")
+    private LocalDateTime dateFinAbonnement;
+
+    @Column(name = "reference_paiement", length = 100)
+    private String referencePaiement;
 
     // ═══════════════════════════════════════════════════════════
     // MÉTADONNÉES

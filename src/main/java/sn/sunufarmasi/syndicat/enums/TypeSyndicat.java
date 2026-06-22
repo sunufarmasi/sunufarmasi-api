@@ -9,7 +9,9 @@ package sn.sunufarmasi.syndicat.enums;
 public enum TypeSyndicat {
 
     COMMUNE("Commune", "Gère les pharmacies d'une commune"),
-    DEPARTEMENT("Département", "Gère les pharmacies d'un département entier");
+    ZONE("Zone multi-communes", "Gère les pharmacies de plusieurs communes spécifiques"),
+    DEPARTEMENT("Département", "Gère les pharmacies d'un département entier"),
+    REGION("Région", "Gère les pharmacies d'une région entière");
 
     private final String libelle;
     private final String description;

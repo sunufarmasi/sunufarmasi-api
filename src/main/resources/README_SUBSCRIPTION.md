@@ -384,13 +384,13 @@ public class SunufarmasiApplication {
 ## 📞 **SUPPORT**
 
 Pour toute question sur le système d'abonnement :
-- Email: support@sunufarmasi.sn
+- Email: sunufarmasi@gmail.com
 - Documentation API: https://api.sunufarmasi.sn/docs
 
 ---
 
 **🎉 Système d'abonnement complet et fonctionnel !**
 
-*Auteur: WeCan*  
+*Auteur: AL Amine*  
 *Version: 1.0.0*  
 *Date: 2025*

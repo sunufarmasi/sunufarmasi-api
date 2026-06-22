@@ -1,1 +1,0 @@
-# sunufarmasi-api

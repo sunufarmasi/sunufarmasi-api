@@ -7,6 +7,8 @@ import sn.sunufarmasi.syndicat.dto.response.SyndicatResponse;
 import sn.sunufarmasi.syndicat.entity.Syndicat;
 import sn.sunufarmasi.syndicat.enums.TypeSyndicat;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,6 +32,8 @@ public class SyndicatMapper {
         // Déterminer la zone selon le type
         UUID zoneId = null;
         String nomZone = null;
+        List<UUID> communeIds = Collections.emptyList();
+        List<String> communeNoms = Collections.emptyList();
 
         if (syndicat.getType() == TypeSyndicat.COMMUNE && syndicat.getCommune() != null) {
             zoneId = syndicat.getCommune().getId();
@@ -37,6 +41,16 @@ public class SyndicatMapper {
         } else if (syndicat.getType() == TypeSyndicat.DEPARTEMENT && syndicat.getDepartement() != null) {
             zoneId = syndicat.getDepartement().getId();
             nomZone = syndicat.getDepartement().getNom();
+        } else if (syndicat.getType() == TypeSyndicat.REGION && syndicat.getRegion() != null) {
+            zoneId = syndicat.getRegion().getId();
+            nomZone = syndicat.getRegion().getNom();
+        } else if (syndicat.getType() == TypeSyndicat.ZONE && syndicat.getCommunesZone() != null) {
+            communeIds = syndicat.getCommunesZone().stream()
+                    .map(c -> c.getId()).toList();
+            communeNoms = syndicat.getCommunesZone().stream()
+                    .map(c -> c.getNom()).toList();
+            // Nom de zone = liste des communes
+            nomZone = String.join(", ", communeNoms);
         }
 
         return new SyndicatResponse(
@@ -52,6 +66,10 @@ public class SyndicatMapper {
                 syndicat.getRegion() != null ? syndicat.getRegion().getId() : null,
                 syndicat.getRegion() != null ? syndicat.getRegion().getNom() : null,
 
+                // Communes zone (ZONE type)
+                communeIds,
+                communeNoms,
+
                 // Contact
                 syndicat.getTelephone(),
                 syndicat.getEmail(),
@@ -61,9 +79,15 @@ public class SyndicatMapper {
                 syndicat.getResponsable() != null
                         ? syndicat.getResponsable().getNomComplet()
                         : syndicat.getNomResponsable(),
+                syndicat.getResponsable() != null
+                        ? syndicat.getResponsable().getTelephone()
+                        : syndicat.getTelephoneResponsable(),
 
                 // Abonnement
                 syndicat.getPlan(),
+                syndicat.getStatutAbonnement(),
+                syndicat.getMontantMensuel(),
+                syndicat.getDateDernierPaiement(),
                 syndicat.getEssaiGratuit(),
                 syndicat.getDateFinEssai(),
                 syndicat.getDateFinAbonnement(),

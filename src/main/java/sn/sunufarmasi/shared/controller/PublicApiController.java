@@ -22,6 +22,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.ArrayList;
 
 /**
  * API Publique pour l'application mobile SunuFarmasi
@@ -42,6 +43,7 @@ public class PublicApiController {
     private final PharmacieRepository pharmacieRepository;
     private final GardeRepository gardeRepository;
     private final CommuneRepository communeRepository;
+    private final sn.sunufarmasi.syndicat.repository.SyndicatRepository syndicatRepository;
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // PHARMACIES
@@ -72,17 +74,17 @@ public class PublicApiController {
 
         if (communeId != null) {
             // Priorité 1: Par commune
-            pharmacies = pharmacieRepository.findByCommuneIdAndStatut(communeId, StatutPharmacie.VALIDEE);
+            pharmacies = pharmacieRepository.findByCommuneIdAndStatut(communeId, StatutPharmacie.ACTIVE);
             log.info("Filtre par commune {} → {} pharmacies", communeId, pharmacies.size());
 
         } else if (departementId != null) {
             // Priorité 2: Par département
-            pharmacies = pharmacieRepository.findByDepartementAndStatut(departementId, StatutPharmacie.VALIDEE);
+            pharmacies = pharmacieRepository.findByDepartementAndStatut(departementId, StatutPharmacie.ACTIVE);
             log.info("Filtre par département {} → {} pharmacies", departementId, pharmacies.size());
 
         } else if (regionId != null) {
             // Priorité 3: Par région
-            pharmacies = pharmacieRepository.findByRegionAndStatut(regionId, StatutPharmacie.VALIDEE);
+            pharmacies = pharmacieRepository.findByRegionAndStatut(regionId, StatutPharmacie.ACTIVE);
             log.info("Filtre par région {} → {} pharmacies", regionId, pharmacies.size());
 
         } else if (search != null && !search.isBlank()) {
@@ -92,7 +94,7 @@ public class PublicApiController {
 
         } else {
             // Par défaut: Limiter à 50 pharmacies
-            pharmacies = pharmacieRepository.findByStatut(StatutPharmacie.VALIDEE,
+            pharmacies = pharmacieRepository.findByStatut(StatutPharmacie.ACTIVE,
                     org.springframework.data.domain.PageRequest.of(0, 50)).getContent();
             log.info("Sans filtre → {} pharmacies (limité à 50)", pharmacies.size());
         }
@@ -114,7 +116,7 @@ public class PublicApiController {
             @PathVariable UUID communeId) {
         log.info("GET /api/v1/public/pharmacies/commune/{}", communeId);
 
-        List<Pharmacie> pharmacies = pharmacieRepository.findByCommuneIdAndStatut(communeId, StatutPharmacie.VALIDEE);
+        List<Pharmacie> pharmacies = pharmacieRepository.findByCommuneIdAndStatut(communeId, StatutPharmacie.ACTIVE);
 
         List<Map<String, Object>> result = pharmacies.stream()
                 .map(this::mapPharmacieToPublic)
@@ -134,7 +136,7 @@ public class PublicApiController {
             @PathVariable UUID departementId) {
         log.info("GET /api/v1/public/pharmacies/departement/{}", departementId);
 
-        List<Pharmacie> pharmacies = pharmacieRepository.findByDepartementAndStatut(departementId, StatutPharmacie.VALIDEE);
+        List<Pharmacie> pharmacies = pharmacieRepository.findByDepartementAndStatut(departementId, StatutPharmacie.ACTIVE);
 
         List<Map<String, Object>> result = pharmacies.stream()
                 .map(this::mapPharmacieToPublic)
@@ -154,7 +156,7 @@ public class PublicApiController {
             @PathVariable UUID regionId) {
         log.info("GET /api/v1/public/pharmacies/region/{}", regionId);
 
-        List<Pharmacie> pharmacies = pharmacieRepository.findByRegionAndStatut(regionId, StatutPharmacie.VALIDEE);
+        List<Pharmacie> pharmacies = pharmacieRepository.findByRegionAndStatut(regionId, StatutPharmacie.ACTIVE);
 
         List<Map<String, Object>> result = pharmacies.stream()
                 .map(this::mapPharmacieToPublic)
@@ -214,6 +216,100 @@ public class PublicApiController {
                 String.format("Pharmacies dans un rayon de %.0f km", rayon), result));
     }
 
+    /**
+     * GET /api/v1/public/pharmacies/secteur?communeId=&lat=&lng=
+     * Toutes les pharmacies ACTIVE du secteur (syndicat) qui couvre cette commune.
+     * Inclut isOnDuty (garde du jour). Si lat+lng fournis, triées par distance.
+     */
+    @GetMapping("/pharmacies/secteur")
+    @Transactional
+    @Operation(summary = "Pharmacies du secteur (syndicat) d'une commune")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getPharmaciesSecteur(
+            @RequestParam UUID communeId,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng) {
+
+        log.info("GET /api/v1/public/pharmacies/secteur - communeId={}, lat={}, lng={}", communeId, lat, lng);
+
+        // 1. Trouver le(s) syndicat(s) qui gèrent cette commune (par couverture géographique)
+        List<sn.sunufarmasi.syndicat.entity.Syndicat> syndicats =
+                syndicatRepository.findSyndicatsGestionnairesByCommune(communeId);
+
+        List<Pharmacie> pharmacies;
+
+        if (!syndicats.isEmpty()) {
+            // Commune gérée par un syndicat → pharmacies de ce syndicat uniquement
+            pharmacies = syndicats.stream()
+                    .flatMap(s -> pharmacieRepository.findBySyndicatIdAndStatut(s.getId(), StatutPharmacie.ACTIVE).stream())
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+        } else {
+            // Aucun syndicat → pharmacies de la commune directement
+            pharmacies = new ArrayList<>(pharmacieRepository.findByCommuneIdAndStatut(communeId, StatutPharmacie.ACTIVE));
+        }
+
+        // Si aucune pharmacie du tout → zone non couverte
+        if (pharmacies.isEmpty()) {
+            Map<String, Object> empty = new LinkedHashMap<>();
+            empty.put("syndicatNom", null);
+            empty.put("pharmacies", List.of());
+            empty.put("totalPharmacies", 0);
+            empty.put("totalGardes", 0);
+            return ResponseEntity.ok(ApiResponse.success("Secteur non couvert", empty));
+        }
+
+        // Noms des syndicats pour la réponse
+        String syndicatsNom = syndicats.isEmpty() ? "Zone non syndiquée" : syndicats.stream()
+                .map(sn.sunufarmasi.syndicat.entity.Syndicat::getNom)
+                .distinct()
+                .collect(java.util.stream.Collectors.joining(", "));
+
+        // 3. Gardes du jour pour toutes les pharmacies du secteur
+        LocalDate today = LocalDate.now();
+        List<UUID> pharmacieIds = pharmacies.stream()
+                .map(Pharmacie::getId)
+                .collect(java.util.stream.Collectors.toList());
+        Set<UUID> pharmaciesEnGarde = gardeRepository.findByDateAndPharmacieIds(today, pharmacieIds)
+                .stream()
+                .filter(g -> g.getPharmacie() != null)
+                .map(g -> g.getPharmacie().getId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        // 4. Mapper + enrichir distance
+        List<Map<String, Object>> pharmaciesMapped = pharmacies.stream()
+                .map(p -> {
+                    Map<String, Object> map = mapPharmacieToPublic(p);
+                    map.put("isOnDuty", pharmaciesEnGarde.contains(p.getId()));
+                    if (lat != null && lng != null
+                            && p.getLatitude() != null && p.getLongitude() != null) {
+                        double distance = calculerDistance(lat, lng, p.getLatitude(), p.getLongitude());
+                        map.put("distance", Math.round(distance * 100.0) / 100.0);
+                        map.put("distanceFormate", formatDistance(distance));
+                    }
+                    return map;
+                })
+                .sorted((a, b) -> {
+                    if (a.containsKey("distance") && b.containsKey("distance")) {
+                        return Double.compare((Double) a.get("distance"), (Double) b.get("distance"));
+                    }
+                    return String.valueOf(a.get("nom")).compareToIgnoreCase(String.valueOf(b.get("nom")));
+                })
+                .toList();
+
+        // 5. Réponse
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("syndicatNom", syndicatsNom);
+        result.put("syndicats", syndicats.stream().map(s -> Map.of(
+                "id", s.getId(), "nom", s.getNom(), "code", s.getCode())).toList());
+        result.put("pharmacies", pharmaciesMapped);
+        result.put("totalPharmacies", pharmaciesMapped.size());
+        result.put("totalGardes", pharmaciesEnGarde.size());
+
+        return ResponseEntity.ok(ApiResponse.success(
+                String.format("Secteur %s (%d pharmacies)", syndicatsNom, pharmaciesMapped.size()),
+                result));
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // GARDES
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -259,6 +355,7 @@ public class PublicApiController {
 
             List<Map<String, Object>> gardesJour = gardes.stream()
                     .filter(g -> !jour.isBefore(g.getDateDebut()) && !jour.isAfter(g.getDateFin()))
+                    .filter(g -> g.getPharmacie() != null && StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()))
                     .map(this::mapGardeToPublic)
                     .toList();
 
@@ -305,6 +402,7 @@ public class PublicApiController {
         }
 
         List<Map<String, Object>> result = gardes.stream()
+                .filter(g -> g.getPharmacie() != null && StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()))
                 .map(this::mapGardeToPublic)
                 .toList();
 
@@ -326,6 +424,7 @@ public class PublicApiController {
         List<Garde> gardes = gardeRepository.findByDateAndCommune(today, communeId);
 
         List<Map<String, Object>> result = gardes.stream()
+                .filter(g -> g.getPharmacie() != null && StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()))
                 .map(this::mapGardeToPublic)
                 .toList();
 
@@ -347,6 +446,7 @@ public class PublicApiController {
         List<Garde> gardes = gardeRepository.findByDateAndDepartement(today, departementId);
 
         List<Map<String, Object>> result = gardes.stream()
+                .filter(g -> g.getPharmacie() != null && StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()))
                 .map(this::mapGardeToPublic)
                 .toList();
 
@@ -368,6 +468,7 @@ public class PublicApiController {
         List<Garde> gardes = gardeRepository.findByDateAndRegion(today, regionId);
 
         List<Map<String, Object>> result = gardes.stream()
+                .filter(g -> g.getPharmacie() != null && StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()))
                 .map(this::mapGardeToPublic)
                 .toList();
 
@@ -392,6 +493,7 @@ public class PublicApiController {
 
         List<Map<String, Object>> result = gardes.stream()
                 .filter(g -> g.getPharmacie() != null &&
+                        StatutPharmacie.ACTIVE.equals(g.getPharmacie().getStatut()) &&
                         g.getPharmacie().getLatitude() != null &&
                         g.getPharmacie().getLongitude() != null)
                 .map(g -> {
