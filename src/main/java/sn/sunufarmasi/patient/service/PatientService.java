@@ -11,9 +11,11 @@ import sn.sunufarmasi.patient.dto.response.PatientResponse;
 import sn.sunufarmasi.patient.entity.Patient;
 import sn.sunufarmasi.patient.mapper.PatientMapper;
 import sn.sunufarmasi.patient.repository.PatientRepository;
+import sn.sunufarmasi.payment.repository.PaymentRepository;
 import sn.sunufarmasi.shared.constant.ErrorMessages;
 import sn.sunufarmasi.shared.exception.ConflictException;
 import sn.sunufarmasi.shared.exception.ResourceNotFoundException;
+import sn.sunufarmasi.subscription.repository.SubscriptionRepository;
 import sn.sunufarmasi.subscription.service.SubscriptionService;
 
 import java.time.LocalDate;
@@ -36,6 +38,8 @@ public class PatientService {
     private final CommuneRepository communeRepository;
     private final PatientMapper patientMapper;
     private final SubscriptionService subscriptionService;
+    private final SubscriptionRepository subscriptionRepository;
+    private final PaymentRepository paymentRepository;
 
     // ═══════════════════════════════════════════════════════════
     // INSCRIPTION
@@ -290,6 +294,12 @@ public class PatientService {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
         log.info("🗑 Suppression patient: {} ({})", patient.getId(), patient.getNomComplet());
+        // Supprimer les paiements liés (FK constraint)
+        var payments = paymentRepository.findByPatientIdOrderByCreatedAtDesc(patientId);
+        paymentRepository.deleteAll(payments);
+        // Supprimer les abonnements liés (FK constraint)
+        var subscriptions = subscriptionRepository.findByPatientIdOrderByCreatedAtDesc(patientId);
+        subscriptionRepository.deleteAll(subscriptions);
         patientRepository.delete(patient);
     }
 }
