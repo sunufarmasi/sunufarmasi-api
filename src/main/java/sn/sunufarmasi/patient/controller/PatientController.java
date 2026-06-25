@@ -151,4 +151,15 @@ public class PatientController {
         patientService.reactiverCompte(id);
         return ResponseEntity.ok(ApiResponse.success("Compte réactivé", null));
     }
+
+    /**
+     * DELETE /api/v1/patients/{id} — Supprimer définitivement un patient (ADMIN)
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Supprimer définitivement un patient")
+    public ResponseEntity<ApiResponse<Void>> supprimerPatient(@PathVariable UUID id) {
+        patientService.supprimerPatient(id);
+        return ResponseEntity.ok(ApiResponse.success("Patient supprimé", null));
+    }
 }

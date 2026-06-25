@@ -284,4 +284,12 @@ public class PatientService {
         patient.setActif(true);
         patientRepository.save(patient);
     }
+
+    @Transactional
+    public void supprimerPatient(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        log.info("🗑 Suppression patient: {} ({})", patient.getId(), patient.getNomComplet());
+        patientRepository.delete(patient);
+    }
 }
